@@ -1,111 +1,221 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Auth;
+
+// Controllers
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\MuridDashboardController;
 use App\Http\Controllers\Admin\GuruController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\ChapterController;
-use App\Http\Controllers\EnrollmentController;
-use App\Http\Controllers\CertificateController;
-use App\Http\Controllers\CommentController;
-use Illuminate\Support\Facades\Auth;
-use App\Models\User;
+use App\Http\Controllers\ChapterPageController;
 
-Route::get('/', fn () => view('landing'));
+/*
+|--------------------------------------------------------------------------
+| LANDING
+|--------------------------------------------------------------------------
+*/
+Route::get('/', fn () => view('landing'))->name('home');
 
-// MODULES - LEARNING MANAGEMENT (accessible to murid only)
+
+/*
+|--------------------------------------------------------------------------
+| REDIRECT DASHBOARD BERDASARKAN ROLE
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'verified'])->get('/dashboard', function () {
+    $user = Auth::user();
+
+    return match ($user->role) {
+        'admin' => redirect()->route('admin.dashboard'),
+        'guru'  => redirect()->route('guru.dashboard'),
+        default => redirect()->route('murid.dashboard'),
+    };
+})->name('dashboard');
+
+
+/*
+|--------------------------------------------------------------------------
+| ROUTES MURID
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:murid'])->prefix('murid')->name('murid.')->group(function () {
+
+    // ========== DASHBOARD ==========
+    Route::get('/', [MuridDashboardController::class, 'index'])
+        ->name('dashboard');
+
+    // ========== TUGAS MURID ==========
+    Route::get('/tugas', [MuridDashboardController::class, 'tugas'])
+        ->name('tugas');
+
+    // ========== LIST MODUL ==========
+    Route::get('/modul', [MuridDashboardController::class, 'modul'])
+        ->name('modul');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| ROUTES MODUL & CHAPTER (AKSES MURID)
+|--------------------------------------------------------------------------
+| Route ini tidak memakai prefix 'murid', supaya URL tetap:
+|   /modul
+|   /modul/{id}
+|   /chapter/{id}
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'role:murid'])->group(function () {
-    Route::get('/modules', [ModuleController::class, 'index'])->name('modules.index');
-    Route::get('/modules/{module}', [ModuleController::class, 'show'])->name('modules.show');
-    Route::post('/modules/{module}/enroll', [EnrollmentController::class, 'store'])->name('enrollments.store');
-    
-    Route::get('/chapters/{chapter}', [ChapterController::class, 'show'])->name('chapters.show');
-    Route::post('/chapters/{chapter}/answer', [ChapterController::class, 'submitAnswer'])->name('chapters.answer');
-    
-    Route::post('/chapters/{chapter}/comment', [CommentController::class, 'store'])->name('comments.store');
-    Route::delete('/comments/{comment}', [CommentController::class, 'destroy'])->name('comments.destroy');
-    
-    Route::post('/modules/{module}/certificate', [CertificateController::class, 'generate'])->name('certificates.generate');
-    Route::get('/certificates/{certificate}', [CertificateController::class, 'show'])->name('certificates.show');
-    Route::get('/certificates/{certificate}/download', [CertificateController::class, 'download'])->name('certificates.download');
+
+    // ========== MODUL ==========
+    Route::get('/modul', [ModuleController::class, 'index'])
+        ->name('modules.index');
+
+    Route::get('/modul/{id}', [ModuleController::class, 'show'])
+        ->name('modules.show');
+
+    // ========== CHAPTER ==========
+    Route::get('/chapter/{id}', [ModuleController::class, 'chapter'])
+        ->name('modules.chapter');
+
+    Route::post('/chapter/{id}/complete', [ModuleController::class, 'complete'])
+        ->name('modules.chapter.complete');
 });
 
-// MODULES - GURU DASHBOARD & MANAGEMENT
-Route::middleware(['auth', 'role:guru'])->group(function () {
-    Route::get('/guru/modules', [ModuleController::class, 'teach'])->name('modules.teach');
-    Route::get('/modules/{module}/students', [EnrollmentController::class, 'moduleStudents'])->name('enrollments.students');
-    Route::get('/modules/{module}/students/{enrollment}', [EnrollmentController::class, 'studentDetail'])->name('enrollments.studentDetail');
-    
-    // Guru create/edit/delete modules
-    Route::get('/guru/modules/create', [ModuleController::class, 'create'])->name('modules.create');
-    Route::post('/guru/modules', [ModuleController::class, 'store'])->name('modules.store');
-    Route::get('/guru/modules/{module}/edit', [ModuleController::class, 'edit'])->name('modules.edit');
-    Route::patch('/guru/modules/{module}', [ModuleController::class, 'update'])->name('modules.update');
-    Route::delete('/guru/modules/{module}', [ModuleController::class, 'destroy'])->name('modules.destroy');
-    
-    // Guru manage chapters
-    Route::get('/guru/modules/{module}/chapters/create', [ChapterController::class, 'create'])->name('chapters.create');
-    Route::post('/guru/modules/{module}/chapters', [ChapterController::class, 'store'])->name('chapters.store');
-    Route::get('/guru/chapters/{chapter}/edit', [ChapterController::class, 'edit'])->name('chapters.edit');
-    Route::patch('/guru/chapters/{chapter}', [ChapterController::class, 'update'])->name('chapters.update');
-    Route::delete('/guru/chapters/{chapter}', [ChapterController::class, 'destroy'])->name('chapters.destroy');
-    
-    // Guru manage questions
-    Route::get('/guru/chapters/{chapter}/questions/create', ['App\\Http\\Controllers\\QuestionController', 'create'])->name('questions.create');
-    Route::post('/guru/chapters/{chapter}/questions', ['App\\Http\\Controllers\\QuestionController', 'store'])->name('questions.store');
-    Route::get('/guru/questions/{question}/edit', ['App\\Http\\Controllers\\QuestionController', 'edit'])->name('questions.edit');
-    Route::patch('/guru/questions/{question}', ['App\\Http\\Controllers\\QuestionController', 'update'])->name('questions.update');
-    Route::delete('/guru/questions/{question}', ['App\\Http\\Controllers\\QuestionController', 'destroy'])->name('questions.destroy');
-});
 
-// DASHBOARD REDIRECT OTOMATIS BERDASARKAN ROLE
-Route::middleware(['auth', 'verified'])
-    ->get('/dashboard', function () {
-        $user = Auth::user();
 
-        return match ($user->role) {
-            'admin' => redirect()->route('admin.dashboard'),
-            'guru'  => redirect()->route('guru.dashboard'),
-            default => redirect()->route('murid.dashboard'),
-        };
-    })
-    ->name('dashboard');
-
-// ROLE: MURID
-Route::middleware(['auth', 'role:murid'])
-    ->get('/murid', fn () => view('dashboard.murid'))
-    ->name('murid.dashboard');
-
-// ROLE: GURU
+/*
+|--------------------------------------------------------------------------
+| ROUTE GURU
+|--------------------------------------------------------------------------
+*/
 Route::middleware(['auth', 'role:guru'])
-    ->get('/guru', fn () => view('dashboard.guru'))
-    ->name('guru.dashboard');
+    ->prefix('guru')
+    ->name('guru.')
+    ->group(function () {
 
-// ROLE: ADMIN
-Route::middleware(['auth', 'role:admin'])->group(function () {
-    Route::get('/admin', function () {
-        $gurus = User::where('role', 'guru')->paginate(10);
-        return view('dashboard.admin', compact('gurus'));
-    })
-        ->name('admin.dashboard');
-    
-    // Manage Guru
-    Route::prefix('admin/guru')->name('guru.')->group(function () {
-        Route::get('/', [GuruController::class, 'index'])->name('index');
-        Route::get('/create', [GuruController::class, 'create'])->name('create');
-        Route::post('/', [GuruController::class, 'store'])->name('store');
-        Route::get('/{guru}/edit', [GuruController::class, 'edit'])->name('edit');
-        Route::patch('/{guru}', [GuruController::class, 'update'])->name('update');
-        Route::delete('/{guru}', [GuruController::class, 'destroy'])->name('destroy');
-    });
+    // Dashboard guru
+    Route::get('/', fn () => view('dashboard.guru'))->name('dashboard');
+
+    /*
+    |--------------------------------------------------------------------------
+    | MODUL GURU
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/modul', [ModuleController::class, 'guruIndex'])->name('modul.index');
+    Route::get('/modul/create', [ModuleController::class, 'create'])->name('modul.create');
+    Route::post('/modul', [ModuleController::class, 'store'])->name('modul.store');
+
+    // ❗ FIX: gunakan {module} agar cocok dengan Module $module
+    Route::get('/modul/{module}/edit', [ModuleController::class, 'edit'])->name('modul.edit');
+    Route::patch('/modul/{module}', [ModuleController::class, 'update'])->name('modul.update');
+    Route::delete('/modul/{module}', [ModuleController::class, 'destroy'])->name('modul.destroy');
+
+    /*
+    |--------------------------------------------------------------------------
+    | CHAPTER
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/modul/{module}/chapter', [ChapterController::class, 'index'])
+        ->name('modul.chapter.index');
+
+    Route::get('/modul/{module}/chapter/create', [ChapterController::class, 'create'])
+        ->name('modul.chapter.create');
+
+    Route::post('/modul/{module}/chapter/store', [ChapterController::class, 'store'])
+        ->name('modul.chapter.store');
+
+    Route::get('/chapter/{chapter}/edit', [ChapterController::class, 'edit'])
+        ->name('modul.chapter.edit');
+
+    Route::patch('/chapter/{chapter}/update', [ChapterController::class, 'update'])
+        ->name('modul.chapter.update');
+
+    Route::delete('/chapter/{chapter}/delete', [ChapterController::class, 'destroy'])
+        ->name('modul.chapter.delete');
+
+    /*
+    |--------------------------------------------------------------------------
+    | CHAPTER PAGES (VIDEO + SOAL)
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/chapter/{chapter}/pages', [ChapterPageController::class, 'index'])
+        ->name('modul.chapter.pages.index');
+
+    Route::get('/chapter/{chapter}/pages/create', [ChapterPageController::class, 'create'])
+        ->name('modul.chapter.pages.create');
+
+    Route::post('/chapter/{chapter}/pages', [ChapterPageController::class, 'store'])
+        ->name('modul.chapter.pages.store');
+
+    /*
+    |--------------------------------------------------------------------------
+    | PROFIL GURU
+    |--------------------------------------------------------------------------
+    */
+    Route::get('/profile', fn () => view('guru.profile'))->name('profile');
+    Route::get('/profile/edit', fn () => view('guru.profile-edit'))->name('profile.edit');
+    Route::patch('/profile/update', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password/update', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+    Route::delete('/profile/delete', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // LIST PAGE
+    Route::get('/chapter/{chapter}/pages', [ChapterPageController::class, 'index'])
+        ->name('modul.chapter.pages.index');
+
+    // CREATE PAGE
+    Route::get('/chapter/{chapter}/pages/create', [ChapterPageController::class, 'create'])
+        ->name('modul.chapter.pages.create');
+
+    Route::post('/chapter/{chapter}/pages', [ChapterPageController::class, 'store'])
+        ->name('modul.chapter.pages.store');
+
+    // EDIT PAGE
+    Route::get('/chapter/{chapter}/pages/{page}/edit', [ChapterPageController::class, 'edit'])
+        ->name('modul.chapter.pages.edit');
+
+    // UPDATE PAGE
+    Route::patch('/chapter/{chapter}/pages/{page}', [ChapterPageController::class, 'update'])
+        ->name('modul.chapter.pages.update');
+
+    // DELETE PAGE
+    Route::delete('/chapter/{chapter}/pages/{page}', [ChapterPageController::class, 'destroy'])
+        ->name('modul.chapter.pages.delete');
+
 });
 
-// PROFILE
+
+/*
+|--------------------------------------------------------------------------
+| ROUTE ADMIN
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
+
+    Route::get('/', [GuruController::class, 'index'])->name('admin.dashboard');
+
+    Route::get('/guru', [GuruController::class, 'index'])->name('guru.index');
+    Route::get('/guru/create', [GuruController::class, 'create'])->name('guru.create');
+    Route::post('/guru', [GuruController::class, 'store'])->name('guru.store');
+    Route::get('/guru/{guru}/edit', [GuruController::class, 'edit'])->name('guru.edit');
+    Route::patch('/guru/{guru}', [GuruController::class, 'update'])->name('guru.update');
+    Route::delete('/guru/{guru}', [GuruController::class, 'destroy'])->name('guru.destroy');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| PROFILE GLOBAL
+|--------------------------------------------------------------------------
+*/
 Route::middleware('auth')->group(function () {
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-// AUTH (LOGIN, REGISTER, ETC)
+
 require __DIR__.'/auth.php';

@@ -1,125 +1,113 @@
-{{-- TAILWIND CDN --}}
-<script src="https://cdn.tailwindcss.com"></script>
+@extends('layouts.guru')
 
-@extends('layouts.app')
+@section('title', 'Edit Profil Guru')
 
 @section('content')
-<div class="min-h-screen bg-gray-100">
-    <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-lg rounded-xl">
-                <div class="p-6 bg-white">
-                    <div class="flex items-center mb-6">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                        </svg>
-                        <h2 class="text-2xl font-bold text-gray-900">Edit Guru</h2>
-                    </div>
 
-                    @if ($errors->any())
-                        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
-                            <div class="flex">
-                                <div class="flex-shrink-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div class="ml-3">
-                                    <h3 class="text-sm font-medium text-red-800">Ada {{ count($errors->all()) }} kesalahan pada form</h3>
-                                    <div class="mt-2 text-sm text-red-700">
-                                        <ul class="list-disc pl-5 space-y-1">
-                                            @foreach ($errors->all() as $error)
-                                                <li>{{ $error }}</li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
+<div class="max-w-3xl mx-auto">
 
-                    <form action="{{ route('guru.update', $guru->id) }}" method="POST" class="space-y-6">
-                        @csrf
-                        @method('PATCH')
+    <!-- CARD PROFIL -->
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-8">
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="md:col-span-2">
-                                <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <input id="name" name="name" type="text" value="{{ old('name', $guru->name) }}" required
-                                           class="pl-10 block w-full border border-gray-300 rounded-md shadow-sm py-3 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                                </div>
-                            </div>
+        <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">
+            Edit Profil Guru
+        </h1>
 
-                            <div class="md:col-span-2">
-                                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                                        </svg>
-                                    </div>
-                                    <input id="email" name="email" type="email" value="{{ old('email', $guru->email) }}" required
-                                           class="pl-10 block w-full border border-gray-300 rounded-md shadow-sm py-3 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password (kosongkan jika tidak diubah)</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <input id="password" name="password" type="password" placeholder="Biarkan kosong jika tidak diubah"
-                                           class="pl-10 block w-full border border-gray-300 rounded-md shadow-sm py-3 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Konfirmasi Password</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <input id="password_confirmation" name="password_confirmation" type="password" placeholder="Konfirmasi password"
-                                           class="pl-10 block w-full border border-gray-300 rounded-md shadow-sm py-3 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between pt-6 border-t border-gray-200">
-                            <div class="text-sm text-gray-500">
-                                <span class="font-medium">ID Guru:</span> {{ $guru->id }}
-                            </div>
-                            <div class="flex items-center space-x-3">
-                                <a href="{{ route('guru.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors duration-200 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                    </svg>
-                                    Kembali
-                                </a>
-                                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-200 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    Simpan Perubahan
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+        <!-- SUCCESS -->
+        @if (session('success'))
+            <div class="mb-4 p-4 bg-green-100 border-l-4 border-green-500 text-green-700 rounded">
+                {{ session('success') }}
             </div>
-        </div>
+        @endif
+
+        <!-- ERROR -->
+        @if ($errors->any())
+            <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
+                <ul class="list-disc pl-5">
+                    @foreach ($errors->all() as $err)
+                        <li>{{ $err }}</li>
+                    @endforeach
+                </ul>
+            </div>
+        @endif
+
+        <!-- FORM UPDATE PROFILE -->
+        <form method="POST" action="{{ route('guru.profile.update') }}" class="space-y-6">
+            @csrf
+            @method('PATCH')
+
+            <!-- Nama -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Nama Lengkap
+                </label>
+                <input type="text" name="name" value="{{ old('name', Auth::user()->name) }}"
+                       required
+                       class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
+            <!-- Email -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Email
+                </label>
+                <input type="email" name="email" value="{{ old('email', Auth::user()->email) }}"
+                       required
+                       class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white focus:ring-indigo-500 focus:border-indigo-500">
+            </div>
+
+            <button type="submit"
+                    class="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold">
+                Simpan Perubahan
+            </button>
+        </form>
+
+        <hr class="my-8 border-gray-300 dark:border-gray-700">
+
+        <!-- FORM UPDATE PASSWORD -->
+        <h2 class="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+            Ubah Password
+        </h2>
+
+        <form method="POST" action="{{ route('guru.profile.password.update') }}" class="space-y-6">
+            @csrf
+            @method('PUT')
+
+            <!-- Password Lama -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Password Lama
+                </label>
+                <input type="password" name="current_password" required
+                       class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white">
+            </div>
+
+            <!-- Password Baru -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Password Baru
+                </label>
+                <input type="password" name="new_password" required
+                       class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white">
+            </div>
+
+            <!-- Konfirmasi Password -->
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Konfirmasi Password Baru
+                </label>
+                <input type="password" name="new_password_confirmation" required
+                       class="w-full border border-gray-300 dark:border-gray-700 rounded-lg px-4 py-3 bg-gray-50 dark:bg-gray-700 dark:text-white">
+            </div>
+
+            <button type="submit"
+                    class="px-5 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-semibold">
+                Update Password
+            </button>
+        </form>
+
     </div>
+
 </div>
+
 @endsection

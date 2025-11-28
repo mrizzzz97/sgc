@@ -2,23 +2,44 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Module;
 use App\Models\Chapter;
 use App\Models\Question;
 use App\Models\ChapterCompletion;
 use App\Models\Enrollment;
+use App\Models\Answer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Helpers\XpHelper;
 
 class ChapterController extends Controller
 {
+    // ===========================
+    // GURU: LIST CHAPTER
+    // ===========================
+    public function index(Module $module)
+    {
+        $module->load('chapters');
+        return view('guru.chapters.index', compact('module'));
+    }
+
+    // ===========================
+    // MURID: TAMPILKAN CHAPTER
+    // ===========================
     public function show(Chapter $chapter)
     {
+        if (Auth::check()) {
+            XpHelper::addXP(Auth::user(), 20);
+        }
+
         $chapter->load('questions', 'comments.user', 'comments.replies.user');
-        
+
         return view('chapters.show', compact('chapter'));
     }
 
-    // Murid: Submit jawaban soal (multiple answers)
+    // ===========================
+    // MURID: SUBMIT JAWABAN
+    // ===========================
     public function submitAnswer(Request $request, Chapter $chapter)
     {
         try {
@@ -27,48 +48,56 @@ class ChapterController extends Controller
             ]);
 
             $user = $request->user();
-            $enrollment = $user->enrollments()->where('module_id', $chapter->module_id)->first();
+
+            // CEK ENROLLMENT
+            $enrollment = $user->enrollments()
+                ->where('module_id', $chapter->module_id)
+                ->first();
+
             if (!$enrollment) {
                 return response()->json(['error' => 'Not enrolled'], 403);
             }
 
-            // Prepare questions keyed by id for quick lookup
             $questions = $chapter->questions->keyBy('id');
             $totalXp = 0;
             $essayPending = 0;
 
+            // SIMPAN JAWABAN
             foreach ($validated['answers'] as $questionId => $answerText) {
                 $question = $questions->get($questionId);
                 if (!$question) continue;
 
-                // Save or update answer record
-                $answerRecord = \App\Models\Answer::updateOrCreate(
+                $answerRecord = Answer::updateOrCreate(
                     [
                         'user_id' => $user->id,
                         'question_id' => $question->id,
                     ],
                     [
                         'chapter_id' => $chapter->id,
-                        'answer_text' => is_array($answerText) ? json_encode($answerText) : (string) $answerText,
+                        'answer_text' => is_array($answerText)
+                            ? json_encode($answerText)
+                            : (string)$answerText,
                     ]
                 );
 
-                // Auto-grade multiple choice
                 if ($question->type === 'multiple_choice') {
-                    $isCorrect = trim((string) $answerText) === trim((string) $question->correct_answer);
+
+                    // BENAR / SALAH
+                    $isCorrect = trim($answerText) === trim($question->correct_answer);
                     $points = $isCorrect ? (int)$question->points : 0;
 
                     $answerRecord->is_correct = $isCorrect;
                     $answerRecord->points_awarded = $points;
                     $answerRecord->graded_at = now();
-                    $answerRecord->graded_by = null; // system
+                    $answerRecord->graded_by = null;
                     $answerRecord->save();
 
                     if ($isCorrect) {
                         $totalXp += $points;
                     }
+
                 } else {
-                    // Essay: leave is_correct null until teacher grades
+                    // ESSAY
                     $answerRecord->is_correct = null;
                     $answerRecord->points_awarded = 0;
                     $answerRecord->save();
@@ -76,7 +105,7 @@ class ChapterController extends Controller
                 }
             }
 
-            // Add XP to user's daily XP (only awarded for correct MCQs for now)
+            // TAMBAH DAILY XP
             if ($totalXp > 0) {
                 $user->dailyXps()->firstOrCreate(
                     ['date' => now()->toDateString()],
@@ -84,37 +113,32 @@ class ChapterController extends Controller
                 )->increment('xp_points', $totalXp);
             }
 
-            // Determine chapter completion: require all questions to be correct (MCQ) and essays must be graded as correct
+            // HITUNG PROGRESS CHAPTER
             $totalQuestions = $questions->count();
-            $correctCount = \App\Models\Answer::where('user_id', $user->id)
+            $correctCount = Answer::where('user_id', $user->id)
                 ->where('chapter_id', $chapter->id)
                 ->where('is_correct', true)
                 ->count();
 
-            // For essays, only count those already graded true
-            $gradedEssayCount = \App\Models\Answer::where('user_id', $user->id)
-                ->where('chapter_id', $chapter->id)
-                ->where('is_correct', true)
-                ->count();
-
-            // If number of correct answers equals total questions, mark as completed
             $chapterCompleted = ($correctCount >= $totalQuestions && $totalQuestions > 0);
 
             if ($chapterCompleted) {
-                \App\Models\ChapterCompletion::firstOrCreate([
+                ChapterCompletion::firstOrCreate([
                     'user_id' => $user->id,
                     'chapter_id' => $chapter->id,
                 ]);
             }
 
-            // Recalculate enrollment progress based on chapter_completions across module
+            // HITUNG PROGRESS MODULE
             $module = $chapter->module()->with('chapters')->first();
             $totalChapters = $module->chapters->count() ?: 1;
-            $completedChapters = \App\Models\ChapterCompletion::where('user_id', $user->id)
+
+            $completedChapters = ChapterCompletion::where('user_id', $user->id)
                 ->whereIn('chapter_id', $module->chapters->pluck('id'))
                 ->count();
 
             $progress = intval(($completedChapters / $totalChapters) * 100);
+
             $enrollment->progress = $progress;
             if ($progress >= 100) {
                 $enrollment->status = 'completed';
@@ -128,61 +152,80 @@ class ChapterController extends Controller
                 'chapterCompleted' => $chapterCompleted,
                 'essayPending' => $essayPending,
             ]);
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json(['error' => 'Invalid input', 'details' => $e->errors()], 422);
+
         } catch (\Exception $e) {
-            // Log and return JSON so client doesn't get HTML error page
-            logger()->error('submitAnswer error: ' . $e->getMessage(), ['exception' => $e]);
-            return response()->json(['error' => 'Server error', 'message' => $e->getMessage()], 500);
+            logger()->error('submitAnswer error: '.$e->getMessage());
+            return response()->json(['error' => 'Server error'], 500);
         }
     }
 
-    // Guru: Form create chapter
-    public function create(\App\Models\Module $module)
+    // ===========================
+    // GURU: FORM CREATE
+    // ===========================
+    public function create(Module $module)
     {
-        return view('chapters.create', compact('module'));
+        return view('guru.chapters.create', compact('module'));
     }
 
-    // Guru: Save chapter
-    public function store(Request $request, \App\Models\Module $module)
+    // ===========================
+    // GURU: STORE
+    // ===========================
+    public function store(Request $request, Module $module)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'youtube_url' => 'required|string|max:500',
-            'order' => 'required|integer|min:1',
+            'title'       => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'content'     => 'nullable|string',
+            'video_url'   => 'nullable|string|max:500',
+            'order'       => 'required|integer|min:1',
         ]);
 
-        $chapter = $module->chapters()->create($validated);
-        return redirect()->route('modules.edit', $module)->with('success', 'Chapter berhasil ditambahkan');
+        $module->chapters()->create($validated);
+
+        return redirect()
+            ->route('guru.modul.chapter.index', $module->id)
+            ->with('success', 'Chapter berhasil ditambahkan');
     }
 
-    // Guru: Form edit chapter
+    // ===========================
+    // GURU: FORM EDIT
+    // ===========================
     public function edit(Chapter $chapter)
     {
         $module = $chapter->module;
-        return view('chapters.edit', compact('chapter', 'module'));
+        return view('guru.chapters.edit', compact('chapter', 'module'));
     }
 
-    // Guru: Update chapter
+    // ===========================
+    // GURU: UPDATE
+    // ===========================
     public function update(Request $request, Chapter $chapter)
     {
         $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'youtube_url' => 'required|string|max:500',
-            'order' => 'required|integer|min:1',
+            'title'       => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'content'     => 'nullable|string',
+            'video_url'   => 'nullable|string|max:500',
+            'order'       => 'required|integer|min:1',
         ]);
 
         $chapter->update($validated);
-        return redirect()->route('modules.edit', $chapter->module)->with('success', 'Chapter berhasil diubah');
+
+        return redirect()
+            ->route('guru.modul.chapter.index', $chapter->module_id)
+            ->with('success', 'Chapter berhasil diubah');
     }
 
-    // Guru: Delete chapter
+    // ===========================
+    // GURU: DELETE
+    // ===========================
     public function destroy(Chapter $chapter)
     {
-        $module = $chapter->module;
+        $moduleId = $chapter->module_id;
         $chapter->delete();
-        return redirect()->route('modules.edit', $module)->with('success', 'Chapter berhasil dihapus');
+
+        return redirect()
+            ->route('guru.modul.chapter.index', $moduleId)
+            ->with('success', 'Chapter berhasil dihapus');
     }
 }

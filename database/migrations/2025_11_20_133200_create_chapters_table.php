@@ -6,25 +6,20 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('chapters', function (Blueprint $table) {
             $table->id();
             $table->foreignId('module_id')->constrained()->onDelete('cascade');
             $table->string('title');
-            $table->text('description');
-            $table->string('youtube_url');
-            $table->integer('order')->default(0);
+            $table->text('description')->nullable();   // penting -> nullable
+            $table->longText('content')->nullable();    // materi/penjelasan
+            $table->string('video_url')->nullable();    // youtube url
+            $table->integer('order')->default(1);
             $table->timestamps();
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('chapters');
