@@ -1,125 +1,136 @@
-{{-- TAILWIND CDN --}}
-<script src="https://cdn.tailwindcss.com"></script>
+@extends('layouts.admin')
 
-<x-app-layout>
-    <x-slot name="header">
-        <div class="flex justify-between items-center">
-            <div class="flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+@section('title', 'Daftar Guru')
+
+@section('content')
+
+<div class="max-w-7xl mx-auto animate-fade-in">
+
+    {{-- HEADER --}}
+    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-8 gap-4">
+        <div class="flex items-center gap-4">
+
+            {{-- Icon --}}
+            <div class="bg-indigo-100 dark:bg-indigo-900 p-3 rounded-xl transition-all duration-300 hover:scale-110">
+                <svg xmlns="http://www.w3.org/2000/svg" 
+                     class="h-7 w-7 text-indigo-600 dark:text-indigo-300" 
+                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M17 20h5v-2a3 3 0 00-3-3h-1v-2a5 5 0 10-10 0v2H7a3 3 0 00-3 3v2h5" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M9 7a3 3 0 116 0 3 3 0 01-6 0z" />
                 </svg>
-                <h2 class="font-semibold text-xl text-gray-800 leading-tight">
+            </div>
+
+            {{-- Title --}}
+            <div>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white animate-slide-down">
                     Daftar Guru
-                </h2>
-            </div>
-            <a href="{{ route('guru.create') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition-colors duration-200 flex items-center shadow-sm">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                </svg>
-                Tambah Guru
-            </a>
-        </div>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @if ($message = Session::get('success'))
-                <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-lg flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    {{ $message }}
-                </div>
-            @endif
-
-            <div class="bg-white overflow-hidden shadow-md rounded-lg">
-                <div class="p-6">
-                    @if ($gurus->count() > 0)
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            No
-                                        </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Nama
-                                        </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Email
-                                        </th>
-                                        <th class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                            Aksi
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-white divide-y divide-gray-200">
-                                    @foreach ($gurus as $guru)
-                                        <tr class="hover:bg-gray-50 transition-colors">
-                                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                                {{ $loop->iteration }}
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="flex items-center">
-                                                    <div class="flex-shrink-0 h-10 w-10">
-                                                        <div class="h-10 w-10 rounded-full bg-indigo-100 flex items-center justify-center">
-                                                            <span class="text-indigo-600 font-medium">{{ substr($guru->name, 0, 1) }}</span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="ml-4">
-                                                        <div class="text-sm font-medium text-gray-900">{{ $guru->name }}</div>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap">
-                                                <div class="text-sm text-gray-900">{{ $guru->email }}</div>
-                                            </td>
-                                            <td class="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
-                                                <a href="{{ route('guru.edit', $guru->id) }}" class="text-indigo-600 hover:text-indigo-900 mr-3 inline-flex items-center">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-                                                    </svg>
-                                                    Edit
-                                                </a>
-                                                <form action="{{ route('guru.destroy', $guru->id) }}" method="POST" class="inline">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="text-red-600 hover:text-red-900 inline-flex items-center" onclick="return confirm('Yakin ingin menghapus data ini?')">
-                                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                        </svg>
-                                                        Hapus
-                                                    </button>
-                                                </form>
-                                            </td>
-                                        </tr>
-                                    @endforeach
-                                </tbody>
-                            </table>
-                        </div>
-
-                        <div class="mt-6">
-                            {{ $gurus->links() }}
-                        </div>
-                    @else
-                        <div class="text-center py-12">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
-                            </svg>
-                            <h3 class="mt-2 text-sm font-medium text-gray-900">Belum ada data guru</h3>
-                            <p class="mt-1 text-sm text-gray-500">Mulai dengan menambahkan guru baru.</p>
-                            <div class="mt-6">
-                                <a href="{{ route('guru.create') }}" class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="-ml-1 mr-2 h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                    </svg>
-                                    Tambah Guru
-                                </a>     
-                            </div>
-                        </div>
-                    @endif
-                </div>
+                </h1>
+                <p class="text-gray-600 dark:text-gray-400 text-sm mt-1 animate-slide-down animation-delay-100">
+                    Manajemen akun guru.
+                </p>
             </div>
         </div>
+
+        <a href="{{ route('admin.guru.create') }}"
+           class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center shadow animate-slide-up">
+            <svg xmlns="http://www.w3.org/2000/svg" 
+                 class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" 
+                 stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M12 4v16m8-8H4" />
+            </svg>
+            Tambah Guru
+        </a>
     </div>
-</x-app-layout>
+
+    {{-- SUCCESS --}}
+    @if ($message = Session::get('success'))
+        <div class="mb-6 p-4 bg-green-100 dark:bg-green-900/30 border border-green-300 dark:border-green-700 text-green-700 dark:text-green-300 rounded-lg flex items-center animate-bounce-in">
+            <svg xmlns="http://www.w3.org/2000/svg" 
+                 class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" 
+                 stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                      d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            {{ $message }}
+        </div>
+    @endif
+
+    {{-- TABLE CARD --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl p-6 overflow-x-auto animate-slide-up animation-delay-200">
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left">
+                <thead>
+                    <tr class="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-700/40">
+                        <th class="py-3 px-4 font-semibold text-gray-700 dark:text-gray-300">Nama</th>
+                        <th class="py-3 px-4 font-semibold text-gray-700 dark:text-gray-300 hidden md:table-cell">Email</th>
+                        <th class="py-3 px-4 text-center font-semibold text-gray-700 dark:text-gray-300">Aksi</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @forelse ($gurus as $guru)
+                        <tr class="border-b border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-all duration-300 animate-fade-in-row">
+
+                            {{-- NAMA --}}
+                            <td class="py-3 px-4 font-semibold text-gray-800 dark:text-gray-100">
+                                {{ $guru->name }}
+                            </td>
+
+                            {{-- EMAIL --}}
+                            <td class="py-3 px-4 hidden md:table-cell text-gray-700 dark:text-gray-300">
+                                {{ $guru->email }}
+                            </td>
+
+                            {{-- ACTION --}}
+                            <td class="py-3 px-4 flex items-center justify-center gap-3">
+
+                                <a href="{{ route('admin.guru.edit', $guru->id) }}"
+                                   class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                    <span class="hidden sm:inline">Edit</span>
+                                </a>
+
+                                <form method="POST" 
+                                      action="{{ route('admin.guru.destroy', $guru->id) }}"
+                                      onsubmit="return confirm('Yakin hapus guru ini?')">
+                                    @csrf
+                                    @method('DELETE')
+
+                                    <button class="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm transition-all duration-300 transform hover:scale-105 hover:shadow-lg flex items-center gap-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        <span class="hidden sm:inline">Hapus</span>
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+
+                    @empty
+                        <tr>
+                            <td colspan="3" class="text-center py-6 text-gray-600 dark:text-gray-400 animate-pulse">
+                                Belum ada guru terdaftar.
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+
+        {{-- PAGINATION --}}
+        <div class="mt-6 flex justify-center animate-fade-in">
+            {{ $gurus->links('pagination::tailwind') }}
+        </div>
+
+    </div>
+
+</div>
+
+@endsection

@@ -1,143 +1,124 @@
-{{-- TAILWIND CDN --}}
-<script src="https://cdn.tailwindcss.com"></script>
+@extends('layouts.admin')
 
-@extends('layouts.app')
+@section('title', 'Tambah Guru Baru')
 
 @section('content')
-<div class="min-h-screen bg-gray-100">
-    <div class="py-12">
-        <div class="max-w-3xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-xl rounded-xl">
-                <div class="p-6 bg-white">
-                    <div class="flex items-center justify-between mb-6">
-                        <div>
-                            <div class="flex items-center">
-                                <div class="bg-indigo-100 rounded-lg p-3 mr-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                                    </svg>
-                                </div>
-                                <div>
-                                    <h2 class="text-2xl font-bold text-gray-900">Tambah Guru Baru</h2>
-                                    <p class="text-sm text-gray-500 mt-1">Lengkapi formulir di bawah untuk menambahkan guru.</p>
-                                </div>
-                            </div>
-                        </div>
-                        <a href="{{ route('guru.index') }}" class="text-indigo-600 hover:text-indigo-800 flex items-center transition-colors duration-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                            </svg>
-                            Kembali
-                        </a>
-                    </div>
 
-                    @if ($errors->any())
-                        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 text-red-700 rounded">
-                            <div class="flex">
-                                <div class="flex-shrink-0">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
-                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
-                                    </svg>
-                                </div>
-                                <div class="ml-3">
-                                    <h3 class="text-sm font-medium text-red-800">Ada {{ count($errors->all()) }} kesalahan pada form</h3>
-                                    <div class="mt-2 text-sm text-red-700">
-                                        <ul class="list-disc pl-5 space-y-1">
-                                            @foreach ($errors->all() as $error)
-                                                <li>{{ $error }}</li>
-                                            @endforeach
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    @endif
+<div class="max-w-4xl mx-auto py-10">
 
-                    <form action="{{ route('guru.store') }}" method="POST" class="space-y-6">
-                        @csrf
+    {{-- HEADER --}}
+    <div class="flex justify-between items-center mb-8">
+        <div class="flex items-center">
+            <div class="bg-indigo-100 dark:bg-indigo-900 rounded-lg p-3 mr-4">
+                <svg xmlns="http://www.w3.org/2000/svg" 
+                     class="h-6 w-6 text-indigo-600 dark:text-indigo-300" 
+                     fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+            </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="md:col-span-2">
-                                <label for="name" class="block text-sm font-medium text-gray-700 mb-2">Nama Lengkap</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <input id="name" name="name" type="text" value="{{ old('name') }}" required
-                                           class="pl-10 block w-full border border-gray-300 rounded-md shadow-sm py-3 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" 
-                                           placeholder="Masukkan nama lengkap guru" />
-                                </div>
-                            </div>
-
-                            <div class="md:col-span-2">
-                                <label for="email" class="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                            <path d="M2.003 5.884L10 9.882l7.997-3.998A2 2 0 0016 4H4a2 2 0 00-1.997 1.884z" />
-                                            <path d="M18 8.118l-8 4-8-4V14a2 2 0 002 2h12a2 2 0 002-2V8.118z" />
-                                        </svg>
-                                    </div>
-                                    <input id="email" name="email" type="email" value="{{ old('email') }}" required
-                                           class="pl-10 block w-full border border-gray-300 rounded-md shadow-sm py-3 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" 
-                                           placeholder="email@example.com" />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Password</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <input id="password" name="password" type="password" required
-                                           class="pl-10 block w-full border border-gray-300 rounded-md shadow-sm py-3 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" 
-                                           placeholder="Minimal 8 karakter" />
-                                </div>
-                            </div>
-
-                            <div>
-                                <label for="password_confirmation" class="block text-sm font-medium text-gray-700 mb-2">Konfirmasi Password</label>
-                                <div class="relative">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
-                                            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd" />
-                                        </svg>
-                                    </div>
-                                    <input id="password_confirmation" name="password_confirmation" type="password" required
-                                           class="pl-10 block w-full border border-gray-300 rounded-md shadow-sm py-3 px-3 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm" 
-                                           placeholder="Ulangi password" />
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="flex items-center justify-between pt-6 border-t border-gray-200">
-                            <div class="text-sm text-gray-500">
-                                <span class="font-medium">Catatan:</span> Password akan dienkripsi secara otomatis.
-                            </div>
-                            <div class="flex items-center space-x-3">
-                                <a href="{{ route('guru.index') }}" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors duration-200 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                    </svg>
-                                    Batal
-                                </a>
-                                <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 transition-colors duration-200 flex items-center">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                                    </svg>
-                                    Simpan Guru
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">
+                    Tambah Guru Baru
+                </h1>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Lengkapi formulir berikut untuk menambahkan guru.
+                </p>
             </div>
         </div>
+
+        <a href="{{ route('admin.guru.index') }}"
+           class="text-indigo-600 hover:text-indigo-800 dark:text-indigo-300 dark:hover:text-indigo-200 flex items-center transition">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Kembali
+        </a>
     </div>
+
+    {{-- ERROR --}}
+    @if ($errors->any())
+        <div class="mb-6 p-4 bg-red-50 dark:bg-red-900/40 border border-red-500 dark:border-red-600 text-red-700 dark:text-red-300 rounded">
+            <p class="font-semibold mb-2">Ada {{ count($errors) }} kesalahan:</p>
+            <ul class="list-disc pl-5 text-sm">
+                @foreach ($errors->all() as $err)
+                    <li>{{ $err }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
+    {{-- CARD --}}
+    <div class="bg-white dark:bg-gray-800 rounded-xl shadow p-8 transition">
+
+        <form action="{{ route('admin.guru.store') }}" method="POST" class="space-y-6">
+            @csrf
+
+            {{-- NAMA --}}
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Nama Lengkap
+                </label>
+                <input type="text" name="name" value="{{ old('name') }}" required
+                       class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-3 px-4 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                       placeholder="Nama lengkap guru">
+            </div>
+
+            {{-- EMAIL --}}
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Email
+                </label>
+                <input type="email" name="email" value="{{ old('email') }}" required
+                       class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-3 px-4 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                       placeholder="email@example.com">
+            </div>
+
+            {{-- PASSWORD --}}
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Password
+                </label>
+                <input type="password" name="password" required
+                       class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-3 px-4 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                       placeholder="Minimal 8 karakter">
+            </div>
+
+            {{-- KONFIRMASI PASSWORD --}}
+            <div>
+                <label class="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                    Konfirmasi Password
+                </label>
+                <input type="password" name="password_confirmation" required
+                       class="w-full rounded-lg border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 text-gray-900 dark:text-white py-3 px-4 focus:ring-indigo-500 focus:border-indigo-500 transition"
+                       placeholder="Ulangi password">
+            </div>
+
+            {{-- ACTION BUTTON --}}
+            <div class="flex justify-between items-center pt-6 border-t border-gray-200 dark:border-gray-700">
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    Password akan terenkripsi otomatis.
+                </p>
+
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('admin.guru.index') }}"
+                       class="px-4 py-2 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition flex items-center">
+                        Batal
+                    </a>
+
+                    <button type="submit"
+                            class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md transition">
+                        Simpan Guru
+                    </button>
+                </div>
+            </div>
+
+        </form>
+
+    </div>
+
 </div>
+
 @endsection

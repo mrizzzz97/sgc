@@ -6,9 +6,9 @@
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         @foreach($modules as $m)
-            <a href="{{ route('modules.show', $m->id) }}"
+            <a href="{{ route('murid.modules.show', $m->id) }}"
                class="p-5 rounded-xl bg-white dark:bg-gray-800 shadow hover:shadow-lg transition">
-                
+
                 <h2 class="text-xl font-semibold dark:text-white">{{ $m->title }}</h2>
                 <p class="text-gray-600 dark:text-gray-300 text-sm mt-2">{{ $m->description }}</p>
 

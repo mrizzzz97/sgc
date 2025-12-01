@@ -23,4 +23,9 @@ class Module extends Model
     {
         return $this->hasMany(\App\Models\Enrollment::class);
     }
+    public function comments()
+    {
+        return $this->hasMany(\App\Models\ModuleComment::class)->orderBy('created_at', 'desc');
+    }
+
 }

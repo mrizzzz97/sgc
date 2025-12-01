@@ -10,31 +10,22 @@ use Illuminate\Validation\Rules;
 
 class GuruController extends Controller
 {
-    /**
-     * Display a listing of all guru
-     */
     public function index()
     {
         $gurus = User::where('role', 'guru')->paginate(10);
         return view('admin.guru.index', compact('gurus'));
     }
 
-    /**
-     * Show the form for creating a new guru
-     */
     public function create()
     {
         return view('admin.guru.create');
     }
 
-    /**
-     * Store a newly created guru
-     */
     public function store(Request $request)
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users'],
+            'email' => ['required', 'email', 'lowercase', 'unique:users'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
@@ -43,65 +34,56 @@ class GuruController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => 'guru',
-            'email_verified_at' => now(), // langsung verified
+            'email_verified_at' => now(),
         ]);
 
-        return redirect()->route('guru.index')
+        return redirect()->route('admin.guru.index')
             ->with('success', 'Guru berhasil ditambahkan: ' . $guru->name);
     }
 
-    /**
-     * Show the form for editing the specified guru
-     */
     public function edit(User $guru)
     {
-        if ($guru->role !== 'guru') {
-            abort(403);
-        }
+        if ($guru->role !== 'guru') abort(403);
         return view('admin.guru.edit', compact('guru'));
     }
 
-    /**
-     * Update the specified guru
-     */
     public function update(Request $request, User $guru)
     {
-        if ($guru->role !== 'guru') {
-            abort(403);
-        }
+        if ($guru->role !== 'guru') abort(403);
 
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:users,email,' . $guru->id],
-            'password' => ['nullable', 'confirmed', Rules\Password::defaults()],
+            'name'  => ['required', 'string', 'max:255'],
+            'email' => ['required', 'email', 'lowercase', 'max:255', 'unique:users,email,' . $guru->id],
         ]);
 
-        $guru->name = $validated['name'];
-        $guru->email = $validated['email'];
+        $guru->update($validated);
 
-        if (!empty($validated['password'])) {
-            $guru->password = Hash::make($validated['password']);
-        }
-
-        $guru->save();
-
-        return redirect()->route('guru.index')
-            ->with('success', 'Guru berhasil diperbarui: ' . $guru->name);
+        return redirect()->route('admin.guru.index')
+            ->with('success', 'Profil guru berhasil diperbarui!');
     }
 
-    /**
-     * Remove the specified guru
-     */
+    public function updatePassword(Request $request, User $guru)
+    {
+        if ($guru->role !== 'guru') abort(403);
+
+        $validated = $request->validate([
+            'new_password' => ['required', 'string', 'min:6', 'confirmed'],
+        ]);
+
+        $guru->password = Hash::make($validated['new_password']);
+        $guru->save();
+
+        return redirect()->route('admin.guru.edit', $guru->id)
+            ->with('success_password', 'Password guru berhasil diubah!');
+    }
+
     public function destroy(User $guru)
     {
-        if ($guru->role !== 'guru') {
-            abort(403);
-        }
+        if ($guru->role !== 'guru') abort(403);
 
-        $name = $guru->name;
         $guru->delete();
 
-        return redirect()->route('guru.index')
-            ->with('success', 'Guru berhasil dihapus: ' . $name);
+        return redirect()->route('admin.guru.index')
+            ->with('success', 'Guru berhasil dihapus!');
     }
 }

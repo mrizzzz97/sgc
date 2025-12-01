@@ -14,7 +14,7 @@ return new class extends Migration
             $table->string('title');
             $table->text('description')->nullable();   // penting -> nullable
             $table->longText('content')->nullable();    // materi/penjelasan
-            $table->string('video_url')->nullable();    // youtube url
+            $table->string('video_url')->nullable();    
             $table->integer('order')->default(1);
             $table->timestamps();
         });
