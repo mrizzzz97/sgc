@@ -97,7 +97,7 @@
                 </div>
             </a>
             
-            <a href="{{ route('guru.profile') }}" class="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg transition-colors duration-200">
+            <a href="{{ route('guru.profile.edit') }}" class="flex items-center gap-3 p-4 bg-green-50 dark:bg-green-900/20 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-lg transition-colors duration-200">
                 <div class="w-10 h-10 bg-green-600 rounded-lg flex items-center justify-center text-white">
                     <i class="fas fa-user-cog"></i>
                 </div>

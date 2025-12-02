@@ -9,38 +9,30 @@ use App\Models\ChapterCompletion;
 use App\Models\ChapterResult;
 use App\Models\ChapterPageProgress;
 use App\Models\ModuleComment;
+use App\Models\ModuleNotification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\DB;
+use App\Models\User;
+
 
 class ModuleController extends Controller
 {
-    /*
-    |--------------------------------------------------------------------------
-    | GURU: LIST MODUL
-    |--------------------------------------------------------------------------
-    */
+    /* ===========================
+       GURU MODULE MANAGEMENT
+       =========================== */
     public function guruIndex()
     {
         $modules = Module::orderBy('order')->get();
         return view('guru.modul.index', compact('modules'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | GURU: FORM CREATE
-    |--------------------------------------------------------------------------
-    */
     public function create()
     {
         return view('guru.modul.create');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | GURU: SIMPAN MODUL
-    |--------------------------------------------------------------------------
-    */
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -52,26 +44,15 @@ class ModuleController extends Controller
 
         Module::create($validated);
 
-        return redirect()
-            ->route('guru.modul.index')
+        return redirect()->route('guru.modul.index')
             ->with('success', 'Modul berhasil ditambahkan.');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | GURU: EDIT MODUL
-    |--------------------------------------------------------------------------
-    */
     public function edit(Module $module)
     {
         return view('guru.modul.edit', compact('module'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | GURU: UPDATE MODUL
-    |--------------------------------------------------------------------------
-    */
     public function update(Request $request, Module $module)
     {
         $validated = $request->validate([
@@ -83,97 +64,89 @@ class ModuleController extends Controller
 
         $module->update($validated);
 
-        return redirect()
-            ->route('guru.modul.index')
+        return redirect()->route('guru.modul.index')
             ->with('success', 'Modul berhasil diperbarui.');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | GURU: DELETE MODUL
-    |--------------------------------------------------------------------------
-    */
     public function destroy(Module $module)
     {
         $module->delete();
 
-        return redirect()
-            ->route('guru.modul.index')
+        return redirect()->route('guru.modul.index')
             ->with('success', 'Modul berhasil dihapus.');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | MURID: LIST SEMUA MODUL
-    |--------------------------------------------------------------------------
-    */
+    /* ===========================
+       MURID MODULE PAGE
+       =========================== */
     public function index()
     {
         $modules = Module::orderBy('order')->get();
         return view('dashboard.modul', compact('modules'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | MURID: TAMPILKAN DETAIL MODUL
-    |--------------------------------------------------------------------------
-    */
     public function show($id)
     {
-        $module = Module::with(['chapters', 'comments.user'])->findOrFail($id);
+        $module = Module::with(['chapters', 'comments.user', 'comments.replies'])->findOrFail($id);
 
-        $user = Auth::user();
-
-        $completedChapters = ChapterCompletion::where('user_id', $user->id)
+        $completedChapters = ChapterCompletion::where('user_id', Auth::id())
             ->whereIn('chapter_id', $module->chapters->pluck('id'))
             ->pluck('chapter_id')
             ->toArray();
 
-        return view('dashboard.modul_show', [
-            'module' => $module,
-            'completedChapters' => $completedChapters,
-        ]);
+        return view('dashboard.modul_show', compact('module', 'completedChapters'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | MURID: MASUK KE CHAPTER (AUTO KE PAGE 1)
-    |--------------------------------------------------------------------------
-    */
+    /* ===========================
+       CHAPTER CHECK PROTECTION
+       =========================== */
     public function chapter($id)
     {
-        $chapter = Chapter::with('pages')->findOrFail($id);
+        $chapter = Chapter::with('pages', 'module.chapters')->findOrFail($id);
+        $user = Auth::user();
+
+        $chapters = $chapter->module->chapters()->orderBy('order')->get();
+
+        $previousChapter = $chapters
+            ->where('order', '<', $chapter->order)
+            ->sortByDesc('order')
+            ->first();
+
+        if ($previousChapter) {
+            $isPassed = ChapterResult::where('chapter_id', $previousChapter->id)
+                ->where('user_id', $user->id)
+                ->where('passed', true)
+                ->exists();
+
+            if (!$isPassed) {
+                return back()->with('error', 'Selesaikan chapter sebelumnya terlebih dahulu.');
+            }
+        }
 
         $firstPage = $chapter->pages()->orderBy('page_number')->first();
-
-        if (!$firstPage) abort(404, 'Chapter belum memiliki halaman.');
+        if (!$firstPage) abort(404);
 
         return redirect()->route('murid.modules.page', [
             'chapter' => $chapter->id,
-            'page' => $firstPage->page_number
+            'page'    => $firstPage->page_number
         ]);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | MURID: TAMPILKAN HALAMAN
-    |--------------------------------------------------------------------------
-    */
+    /* ===========================
+       MURID PAGE NAVIGATION
+       =========================== */
     public function page($chapterId, $pageNumber)
     {
         $chapter = Chapter::findOrFail($chapterId);
-        $pages = $chapter->pages()->orderBy('page_number')->get();
-        $page = $pages->where('page_number', $pageNumber)->first();
+        $pages   = $chapter->pages()->orderBy('page_number')->get();
+        $page    = $pages->where('page_number', $pageNumber)->first();
 
         if (!$page) abort(404);
 
-        $user = Auth::user();
-
-        // Progress record → create jika belum ada
         $progress = ChapterPageProgress::firstOrCreate(
             [
-                'user_id'   => $user->id,
-                'chapter_id'=> $chapter->id,
+                'user_id'   => Auth::id(),
+                'chapter_id'=> $chapterId,
                 'page_id'   => $page->id,
             ],
             [
@@ -183,29 +156,27 @@ class ModuleController extends Controller
             ]
         );
 
-        return view('dashboard.page', [
-            'chapter'  => $chapter,
-            'pages'    => $pages,
-            'page'     => $page,
-            'progress' => $progress,
-        ]);
+        return view('dashboard.page', compact('chapter', 'pages', 'page', 'progress'));
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | MURID: COMPLETE PAGE
-    |--------------------------------------------------------------------------
-    */
+    /* ===========================
+       COMPLETE PAGE LOGIC
+       =========================== */
     public function complete(Request $request, $chapterId, $currentPage)
     {
         $chapter = Chapter::with('pages')->findOrFail($chapterId);
-        $user = Auth::user();
+        $user    = Auth::user();
 
+        // ======================================
+        // 1. Ambil halaman saat ini
+        // ======================================
         $page = $chapter->pages()
             ->where('page_number', $currentPage)
             ->firstOrFail();
 
-        // Ambil progress record
+        // ======================================
+        // 2. Simpan progress page
+        // ======================================
         $progress = ChapterPageProgress::firstOrCreate(
             [
                 'user_id'   => $user->id,
@@ -214,31 +185,20 @@ class ModuleController extends Controller
             ]
         );
 
-        /*
-        |--------------------------------------------------------------------------
-        | PAGE = VIDEO
-        |--------------------------------------------------------------------------
-        */
+        // Jika video → langsung selesai
         if ($page->type === 'video') {
-            $progress->update([
-                'status' => 'done',
-            ]);
+            $progress->update(['status' => 'done']);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | PAGE = QUESTION
-        |--------------------------------------------------------------------------
-        */
+        // Jika question → cek jawaban
         if ($page->type === 'question') {
-
             $answer = $request->answer;
             if (!$answer) {
                 return back()->with('error', 'Pilih jawaban dulu.');
             }
 
             $isCorrect = $answer == $page->correct_answer;
-            $score = $isCorrect ? 100 : 0;
+            $score     = $isCorrect ? 100 : 0;
 
             $progress->update([
                 'status' => 'done',
@@ -247,11 +207,9 @@ class ModuleController extends Controller
             ]);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | NEXT PAGE
-        |--------------------------------------------------------------------------
-        */
+        // ======================================
+        // 3. Cek apakah ada next page?
+        // ======================================
         $nextPage = $chapter->pages()
             ->where('page_number', '>', $currentPage)
             ->orderBy('page_number')
@@ -264,14 +222,30 @@ class ModuleController extends Controller
             ]);
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | CHAPTER SELESAI → HITUNG NILAI CHAPTER
-        |--------------------------------------------------------------------------
-        */
-        $questionPages = $chapter->pages()->where('type', 'question')->get();
+        // ======================================
+        // 4. TANDAI CHAPTER SELESAI (WAJIB DITARO DI SINI)
+        // ======================================
+        $allPagesDone = $chapter->pages->every(function ($p) use ($user, $chapter) {
+            return ChapterPageProgress::where('user_id', $user->id)
+                ->where('chapter_id', $chapter->id)
+                ->where('page_id', $p->id)
+                ->where('status', 'done')
+                ->exists();
+        });
+
+        if ($allPagesDone) {
+            ChapterCompletion::updateOrCreate(
+                ['user_id' => $user->id, 'chapter_id' => $chapter->id],
+                ['completed_at' => now()]
+            );
+        }
+
+        // ======================================
+        // 5. Hitung nilai seluruh soal di chapter
+        // ======================================
+        $questionPages  = $chapter->pages()->where('type', 'question')->get();
         $totalQuestions = $questionPages->count();
-        $correctCount = 0;
+        $correctCount   = 0;
 
         foreach ($questionPages as $q) {
             $pr = ChapterPageProgress::where('user_id', $user->id)
@@ -287,40 +261,24 @@ class ModuleController extends Controller
             ? round(($correctCount / $totalQuestions) * 100)
             : 100;
 
-        $passed = $scorePercent >= 75;
-
         ChapterResult::updateOrCreate(
             ['user_id' => $user->id, 'chapter_id' => $chapter->id],
             [
                 'score'   => $scorePercent,
                 'correct' => $correctCount,
                 'total'   => $totalQuestions,
-                'passed'  => $passed,
+                'passed'  => $scorePercent >= 75,
             ]
         );
 
-        if (!$passed) {
-            return redirect()->route('murid.modules.page', [
-                'chapter' => $chapter->id,
-                'page' => $page->page_number
-            ])->with('error', "Nilai kamu {$scorePercent}%. Minimal 75% untuk lanjut.");
+        if ($scorePercent < 75) {
+            return back()->with('error', "Nilai kamu {$scorePercent}%. Minimal 75% untuk lanjut.");
         }
 
-        /*
-        |--------------------------------------------------------------------------
-        | FINISH CHAPTER PAGE
-        |--------------------------------------------------------------------------
-        */
-        $chapterFinishRedirect = redirect()->route('murid.chapter.finish', [
-            'chapter' => $chapter->id
-        ]);
-
-        /*
-        |--------------------------------------------------------------------------
-        | CEK MODUL SELESAI?
-        |--------------------------------------------------------------------------
-        */
-        $module = $chapter->module;
+        // ======================================
+        // 6. CEK apakah SELURUH CHAPTER modul sudah selesai?
+        // ======================================
+        $module     = $chapter->module;
         $chapterIds = $module->chapters->pluck('id');
 
         $passedCount = ChapterResult::where('user_id', $user->id)
@@ -328,30 +286,27 @@ class ModuleController extends Controller
             ->where('passed', true)
             ->count();
 
-        $allPassed = $passedCount == $chapterIds->count();
-
-        if ($allPassed) {
-
+        // Jika semua chapter lulus → modul selesai
+        if ($passedCount == $chapterIds->count()) {
             $avgScore = round(
                 ChapterResult::where('user_id', $user->id)
                     ->whereIn('chapter_id', $chapterIds)
                     ->avg('score')
             );
 
-            return redirect()->route('modules.result', [
+            return redirect()->route('murid.modules.result', [
                 'id' => $module->id,
                 'avg' => $avgScore
             ]);
         }
 
-        return $chapterFinishRedirect;
+        return redirect()->route('murid.modules.show', $module->id);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | HASIL MODUL
-    |--------------------------------------------------------------------------
-    */
+
+    /* ===========================
+       RESULT & CERTIFICATE
+       =========================== */
     public function result($id)
     {
         $module = Module::with('chapters')->findOrFail($id);
@@ -362,15 +317,10 @@ class ModuleController extends Controller
         ]);
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | GENERATE CERTIFICATE PDF (STREAM)
-    |--------------------------------------------------------------------------
-    */
     public function certificate($id)
     {
         $module = Module::with('chapters')->findOrFail($id);
-        $user = Auth::user();
+        $user   = Auth::user();
 
         $chapterIds = $module->chapters->pluck('id')->toArray();
 
@@ -399,31 +349,44 @@ class ModuleController extends Controller
         return $pdf->stream("Sertifikat_{$module->id}.pdf");
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | COMMENT: TAMBAH KOMENTAR
-    |--------------------------------------------------------------------------
-    */
+    /* ===========================
+       COMMENT SYSTEM
+       =========================== */
+
     public function addComment(Request $request, $id)
     {
         $request->validate([
-            'comment' => 'required|string|max:2000',
+            'comment'   => 'required|string|max:2000',
+            'parent_id' => 'nullable|exists:module_comments,id'
         ]);
 
+        // Simpan komentar
         ModuleComment::create([
             'module_id' => $id,
             'user_id'   => Auth::id(),
             'comment'   => $request->comment,
+            'parent_id' => $request->parent_id,
         ]);
 
-        return back()->with('success', 'Komentar ditambahkan.');
+        // NOTIFIKASI KE GURU
+        $module = Module::findOrFail($id);
+
+        $gurus = User::where('role', 'guru')->get();
+
+        foreach ($gurus as $guru) {
+            if ($guru->id != Auth::id()) {
+                ModuleNotification::create([
+                    'module_id'    => $module->id,
+                    'from_user_id' => Auth::id(),
+                    'to_user_id'   => $guru->id,
+                    'message'      => Auth::user()->name . " mengomentari modul: " . $module->title,
+                ]);
+            }
+        }
+
+        return back()->with('success', 'Komentar berhasil ditambahkan.');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | COMMENT: HAPUS KOMENTAR
-    |--------------------------------------------------------------------------
-    */
     public function deleteComment($id)
     {
         $comment = ModuleComment::findOrFail($id);
@@ -437,20 +400,83 @@ class ModuleController extends Controller
         return back()->with('success', 'Komentar berhasil dihapus.');
     }
 
-    /*
-    |--------------------------------------------------------------------------
-    | MURID: HALAMAN CHAPTER SELESAI
-    |--------------------------------------------------------------------------
-    */
-    public function chapterFinish($chapter)
-
+    /* ===========================
+       GURU LIHAT KOMENTAR
+       =========================== */
+    public function guruComments($id)
     {
-        $chapter = Chapter::with('module')->findOrFail($chapter);
+        $module = Module::with([
+            'comments' => function($q) {
+                $q->orderBy('created_at', 'asc');
+            },
+            'comments.replies',
+            'comments.user'
+        ])->findOrFail($id);
 
-        return view('dashboard.chapter_finish', [
-            'chapter' => $chapter,
-            'module'  => $chapter->module,
-        ]);
+        return view('guru.modul_comments', compact('module'));
     }
-}
 
+    /* ===========================
+       NOTIF: MARK AS READ
+       =========================== */
+    public function markNotifRead($id)
+    {
+        $notif = ModuleNotification::findOrFail($id);
+
+        if ($notif->to_user_id != Auth::id()) {
+            abort(403);
+        }
+
+        $notif->update([
+            'read' => true
+        ]);
+
+        return back();
+    }
+    /* ===========================
+       NOTIF: GURU VIEW NOTIF
+       =========================== */
+       public function guruNotif()
+    {
+        $notifs = ModuleNotification::where('to_user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return view('guru.notif.index', compact('notifs'));
+    }
+
+    public function clearNotif()
+        {
+            ModuleNotification::where('to_user_id', Auth::id())->delete();
+
+            return back()->with('success', 'Semua notifikasi berhasil dihapus.');
+        }
+        /* ===========================
+         LEADERBOARD
+        =========================== */
+        public function leaderboard($moduleId)
+        {
+            $module = Module::with('chapters')->findOrFail($moduleId);
+
+            $chapterIds = $module->chapters->pluck('id');
+
+            // Ambil semua user + hitung rata-rata nilai mereka
+            $leaderboard = ChapterResult::select(
+                    'user_id',
+                    DB::raw('AVG(score) as avg_score'),
+                    DB::raw('SUM(passed) as passed_count')
+                )
+                ->whereIn('chapter_id', $chapterIds)
+                ->groupBy('user_id')
+                ->orderByDesc('avg_score')
+                ->get();
+
+            // Ambil data user untuk ditampilkan
+            $users = User::whereIn('id', $leaderboard->pluck('user_id'))->get()->keyBy('id');
+
+            return view('dashboard.leaderboard', compact('module', 'leaderboard', 'users'));
+        }
+
+
+
+}

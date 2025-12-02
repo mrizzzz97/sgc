@@ -1,324 +1,884 @@
-{{-- TAILWIND CDN --}}
-<script src="https://cdn.tailwindcss.com"></script>
-{{-- AOS CDN --}}
-<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-
-<script>
-    // Konfigurasi Tailwind untuk Dark Mode
-    tailwind.config = {
-        darkMode: 'class',
-        theme: {
-            extend: {
-                colors: {
-                    'primary': '#4F46E5',
-                    'primary-dark': '#4338CA',
-                    'primary-light': '#818CF8',
-                },
-                animation: {
-                    'float': 'float 6s ease-in-out infinite',
-                },
-                keyframes: {
-                    float: {
-                        '0%, 100%': { transform: 'translateY(0px)' },
-                        '50%': { transform: 'translateY(-20px)' },
-                    }
-                }
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FrontEndClass - Jadi Front-End Developer dari Nol</title>
+    
+    <!-- TAILWIND CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- AOS CDN -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- GSAP CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/ScrollTrigger.min.js"></script>
+    
+    <!-- FONT AWESOME -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CUSTOM FONTS -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary: #ec4899;
+            --accent: #14b8a6;
+        }
+        
+        * {
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+        
+        /* Loading screen */
+        .loader-wrapper {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #fff;
+            z-index: 9999;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+        }
+        
+        .loader {
+            position: relative;
+            width: 150px;
+            height: 150px;
+        }
+        
+        .loader-circle {
+            position: absolute;
+            border-radius: 50%;
+            border: 3px solid transparent;
+        }
+        
+        .loader-circle-1 {
+            width: 150px;
+            height: 150px;
+            border-top-color: var(--primary);
+            animation: rotate1 2s linear infinite;
+        }
+        
+        .loader-circle-2 {
+            width: 120px;
+            height: 120px;
+            top: 15px;
+            left: 15px;
+            border-right-color: var(--secondary);
+            animation: rotate2 2s linear infinite;
+        }
+        
+        .loader-circle-3 {
+            width: 90px;
+            height: 90px;
+            top: 30px;
+            left: 30px;
+            border-bottom-color: var(--accent);
+            animation: rotate3 2s linear infinite;
+        }
+        
+        .loader-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-weight: bold;
+            font-size: 18px;
+            color: var(--primary);
+        }
+        
+        @keyframes rotate1 {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes rotate2 {
+            0% { transform: rotate(120deg); }
+            100% { transform: rotate(480deg); }
+        }
+        
+        @keyframes rotate3 {
+            0% { transform: rotate(240deg); }
+            100% { transform: rotate(600deg); }
+        }
+        
+        /* Floating header */
+        .floating-header {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        /* Navbar background blur effect */
+        .navbar-blur {
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        /* Glowing effect */
+        .glow {
+            box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+        }
+        
+        .glow-on-hover:hover {
+            box-shadow: 0 0 20px rgba(99, 102, 241, 0.7);
+        }
+        
+        /* Gradient text */
+        .gradient-text {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        
+        /* Animated background */
+        .animated-bg {
+            background: linear-gradient(-45deg, #ee7752, #e73c7e, #23a6d5, #23d5ab);
+            background-size: 400% 400%;
+            animation: gradientBG 15s ease infinite;
+        }
+        
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        
+        /* Card hover effects */
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        
+        .card-hover:hover {
+            transform: translateY(-10px);
+        }
+        
+        /* Module card animation */
+        .module-card {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        
+        .module-card:hover::before {
+            left: 100%;
+        }
+        
+        /* Team member card */
+        .team-card {
+            perspective: 1000px;
+        }
+        
+        .team-card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s;
+            transform-style: preserve-3d;
+        }
+        
+        .team-card:hover .team-card-inner {
+            transform: rotateY(180deg);
+        }
+        
+        .team-card-front, .team-card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        
+        .team-card-back {
+            transform: rotateY(180deg);
+        }
+        
+        /* Custom cursor */
+        .custom-cursor {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary);
+            border-radius: 50%;
+            position: fixed;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            transition: all 0.1s ease;
+            z-index: 9998;
+            mix-blend-mode: difference;
+        }
+        
+        .cursor-grow {
+            transform: translate(-50%, -50%) scale(1.5);
+            background-color: rgba(99, 102, 241, 0.5);
+        }
+        
+        /* Particle background */
+        #particles-js {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            z-index: -1;
+        }
+        
+        /* Blob animation */
+        .blob {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(40px);
+            opacity: 0.7;
+            animation: blob 7s infinite;
+        }
+        
+        .blob-1 {
+            background: rgba(99, 102, 241, 0.5);
+            width: 300px;
+            height: 300px;
+            top: -150px;
+            right: -100px;
+            animation-delay: 0s;
+        }
+        
+        .blob-2 {
+            background: rgba(236, 72, 153, 0.5);
+            width: 250px;
+            height: 250px;
+            bottom: -100px;
+            left: -100px;
+            animation-delay: 2s;
+        }
+        
+        .blob-3 {
+            background: rgba(20, 184, 166, 0.5);
+            width: 200px;
+            height: 200px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            animation-delay: 4s;
+        }
+        
+        @keyframes blob {
+            0%, 100% {
+                transform: translate(0, 0) scale(1);
+            }
+            33% {
+                transform: translate(30px, -50px) scale(1.1);
+            }
+            66% {
+                transform: translate(-20px, 20px) scale(0.9);
             }
         }
-    }
-</script>
-
-<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 antialiased transition-colors duration-300">
-
-    {{-- NAVBAR --}}
-    <nav class="w-full fixed top-0 left-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md border-b border-gray-100 dark:border-gray-800 z-50 transition-all duration-300" id="navbar" data-aos="fade-down">
-        <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-
-            <div class="flex items-center">
-                <div class="relative">
-                    <div class="absolute inset-0 bg-primary opacity-20 blur-xl"></div>
-                    <h1 class="text-2xl font-extrabold text-primary dark:text-primary-light relative">FrontEndClass</h1>
+        
+        /* Progress bar animation */
+        .progress-bar {
+            position: relative;
+            height: 6px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            position: absolute;
+            height: 100%;
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+            border-radius: 3px;
+            animation: progressAnimation 2s ease-in-out;
+        }
+        
+        @keyframes progressAnimation {
+            0% { width: 0; }
+        }
+        
+        /* Button animation */
+        .btn-animated {
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .btn-animated::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+            z-index: -1;
+        }
+        
+        .btn-animated:hover::before {
+            transform: translateX(0);
+        }
+        
+        /* Floating elements */
+        .float-element {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        .float-element-delay-1 {
+            animation-delay: 1s;
+        }
+        
+        .float-element-delay-2 {
+            animation-delay: 2s;
+        }
+        
+        .float-element-delay-3 {
+            animation-delay: 3s;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .blob {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body class="bg-white dark:bg-gray-900 text-gray-900 dark:text-gray-100 antialiased transition-colors duration-300 overflow-x-hidden">
+    <!-- Custom Cursor -->
+    <div class="custom-cursor"></div>
+    
+    <!-- Loading Screen -->
+    <div class="loader-wrapper">
+        <div class="loader">
+            <div class="loader-circle loader-circle-1"></div>
+            <div class="loader-circle loader-circle-2"></div>
+            <div class="loader-circle loader-circle-3"></div>
+            <div class="loader-text">FEC</div>
+        </div>
+    </div>
+    
+    <!-- NAVBAR -->
+    <nav class="fixed top-0 left-0 w-full z-50 transition-all duration-300 navbar-blur" id="navbar">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex justify-between items-center">
+                <div class="flex items-center">
+                    <div class="floating-header">
+                        <h1 class="text-2xl font-bold gradient-text">FrontEndClass</h1>
+                    </div>
+                </div>
+                
+                <div class="hidden md:flex items-center space-x-8">
+                    <a href="#materi" class="nav-link relative group">
+                        <span class="font-medium">Materi</span>
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-secondary transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                    <a href="#kelas" class="nav-link relative group">
+                        <span class="font-medium">Kelas</span>
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-secondary transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                    <a href="#tim" class="nav-link relative group">
+                        <span class="font-medium">Tim Kami</span>
+                        <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-primary to-secondary transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                </div>
+                
+                <div class="flex items-center space-x-4">
+                    <!-- Dark Mode Toggle -->
+                    <button id="theme-toggle" type="button" class="p-2 rounded-lg transition-colors">
+                        <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path>
+                        </svg>
+                        <svg id="theme-toggle-light-icon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path>
+                        </svg>
+                    </button>
+                    
+                    @auth
+                        <a href="/dashboard" class="px-5 py-2.5 bg-gradient-to-r from-primary to-secondary text-white rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-lg">
+                            Dashboard
+                        </a>
+                    @else
+                        <a href="/login" class="px-5 py-2.5 border border-primary text-primary dark:text-primary-light dark:border-primary-light rounded-lg font-medium transition-all duration-200">
+                            Login
+                        </a>
+                        <a href="/register" class="px-5 py-2.5 bg-gradient-to-r from-primary to-secondary text-white rounded-lg font-medium transition-all duration-200 transform hover:scale-105 shadow-lg">
+                            Register
+                        </a>
+                    @endauth
+                    
+                    <!-- Mobile menu button -->
+                    <button class="md:hidden" id="mobileMenuBtn">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                        </svg>
+                    </button>
                 </div>
             </div>
-
-            <div class="hidden md:flex items-center gap-6">
-                <a href="#materi" class="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light font-medium transition-colors duration-200 relative group">
-                    Materi
-                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary dark:bg-primary-light transition-all duration-300 group-hover:w-full"></span>
-                </a>
-                <a href="#project" class="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light font-medium transition-colors duration-200 relative group">
-                    Project
-                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary dark:bg-primary-light transition-all duration-300 group-hover:w-full"></span>
-                </a>
-                <a href="#kelas" class="text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light font-medium transition-colors duration-200 relative group">
-                    Kelas
-                    <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-primary dark:bg-primary-light transition-all duration-300 group-hover:w-full"></span>
-                </a>
-            </div>
-
-            <div class="flex items-center gap-3">
-                {{-- Dark Mode Toggle --}}
-                <button id="theme-toggle" type="button" class="text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg p-2.5 transition-colors duration-200">
-                    <svg id="theme-toggle-dark-icon" class="hidden w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M10 2a1 1 0 011 1v1a1 1 0 11-2 0V3a1 1 0 011-1zm4 8a4 4 0 11-8 0 4 4 0 018 0zm-.464 4.95l.707.707a1 1 0 001.414-1.414l-.707-.707a1 1 0 00-1.414 1.414zm2.12-10.607a1 1 0 010 1.414l-.706.707a1 1 0 11-1.414-1.414l.707-.707a1 1 0 011.414 0zM17 11a1 1 0 100-2h-1a1 1 0 100 2h1zm-7 4a1 1 0 011 1v1a1 1 0 11-2 0v-1a1 1 0 011-1zM5.05 6.464A1 1 0 106.465 5.05l-.708-.707a1 1 0 00-1.414 1.414l.707.707zm1.414 8.486l-.707.707a1 1 0 01-1.414-1.414l.707-.707a1 1 0 011.414 1.414zM4 11a1 1 0 100-2H3a1 1 0 000 2h1z"></path></svg>
-                    <svg id="theme-toggle-light-icon" class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z"></path></svg>
-                </button>
-
-                @auth
-                    <a href="/dashboard"
-                        class="px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all duration-200 transform hover:scale-105 shadow-md">
-                        Dashboard
-                    </a>
-                @else
-                    <a href="/login"
-                       class="px-5 py-2.5 border border-primary text-primary dark:text-primary-light dark:border-primary-light rounded-lg hover:bg-primary hover:text-white dark:hover:bg-primary-light dark:hover:text-gray-900 transition-all duration-200">
-                        Login
-                    </a>
-                    <a href="/register"
-                       class="px-5 py-2.5 bg-primary text-white rounded-lg hover:bg-primary-dark transition-all duration-200 transform hover:scale-105 shadow-md">
-                        Register
-                    </a>
-                @endauth
-
-                {{-- Mobile menu button --}}
-                <button class="md:hidden text-gray-700 dark:text-gray-300" id="mobileMenuBtn">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-
-        {{-- Mobile menu --}}
-        <div class="hidden md:hidden bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800" id="mobileMenu">
-            <div class="px-6 py-4 space-y-3">
-                <a href="#materi" class="block text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light font-medium">Materi</a>
-                <a href="#project" class="block text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light font-medium">Project</a>
-                <a href="#kelas" class="block text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-primary-light font-medium">Kelas</a>
+            
+            <!-- Mobile menu -->
+            <div class="hidden md:hidden mt-4 pb-4" id="mobileMenu">
+                <a href="#materi" class="block py-2 font-medium">Materi</a>
+                <a href="#kelas" class="block py-2 font-medium">Kelas</a>
+                <a href="#tim" class="block py-2 font-medium">Tim Kami</a>
             </div>
         </div>
     </nav>
-
-    {{-- HERO --}}
-    <section class="pt-32 pb-20 relative overflow-hidden">
-        {{-- Background decoration --}}
-        <div class="absolute inset-0 -z-10 overflow-hidden">
-            <div class="absolute -top-40 -right-40 w-80 h-80 bg-primary-light opacity-20 dark:opacity-10 rounded-full blur-3xl"></div>
-            <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-indigo-300 opacity-20 dark:opacity-10 rounded-full blur-3xl"></div>
+    
+    <!-- HERO -->
+    <section class="min-h-screen flex items-center justify-center relative pt-20">
+        <!-- Animated Background -->
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="blob blob-1"></div>
+            <div class="blob blob-2"></div>
+            <div class="blob blob-3"></div>
+            <div id="particles-js"></div>
         </div>
-
-        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center gap-12">
-
-            <div class="flex-1" data-aos="fade-right">
-                <div class="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-light text-sm font-medium mb-6 animate-pulse">
-                    <span class="w-2 h-2 bg-primary dark:bg-primary-light rounded-full mr-2"></span>
-                    Belajar Front-End dari Ahlinya
-                </div>
-
-                <h1 class="text-5xl md:text-6xl font-extrabold leading-tight mb-6">
-                    Jadi Front-End Developer,<br>
-                    <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-light">Mulai dari Nol!</span>
-                </h1>
-
-                <p class="text-lg text-gray-600 dark:text-gray-300 max-w-md mb-8">
-                    Belajar HTML, CSS, JavaScript, dan Framework modern dengan metode yang gampang dipahami.
-                </p>
-
-                <div class="flex flex-col sm:flex-row items-center gap-4">
-                    <a href="#materi"
-                       class="w-full sm:w-auto bg-primary text-white px-7 py-3.5 rounded-xl font-semibold text-lg hover:bg-primary-dark transition-all duration-200 transform hover:scale-105 shadow-lg flex items-center justify-center">
-                        Mulai Belajar ⚡
-                    </a>
-
-                    <a href="#materi"
-                       class="w-full sm:w-auto text-primary dark:text-primary-light font-semibold text-lg hover:underline flex items-center justify-center">
-                        Lihat Materi
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-                        </svg>
-                    </a>
-                </div>
-
-                <div class="mt-12 flex items-center gap-8" data-aos="fade-up" data-aos-delay="200">
-                    <div>
-                        <div class="text-3xl font-bold text-primary dark:text-primary-light">10K+</div>
-                        <div class="text-sm text-gray-600 dark:text-gray-400">Siswa Aktif</div>
+        
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div class="order-2 md:order-1">
+                    <div class="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 dark:bg-primary/20 text-primary dark:text-primary-light text-sm font-medium mb-6">
+                        <span class="w-2 h-2 bg-primary dark:bg-primary-light rounded-full mr-2 animate-pulse"></span>
+                        Belajar Front-End dari Ahlinya
                     </div>
-                    <div>
-                        <div class="text-3xl font-bold text-primary dark:text-primary-light">50+</div>
-                        <div class="text-sm text-gray-600 dark:text-gray-400">Materi Pembelajaran</div>
+                    
+                    <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
+                        Jadi Front-End Developer,<br>
+                        <span class="gradient-text">Mulai dari Nol!</span>
+                    </h1>
+                    
+                    <p class="text-lg text-gray-600 dark:text-gray-300 mb-8">
+                        Belajar HTML, CSS, JavaScript, dan Framework modern dengan metode yang gampang dipahami.
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row gap-4 mb-12">
+                        <a href="#materi" class="btn-animated px-7 py-3.5 bg-gradient-to-r from-primary to-secondary text-white rounded-lg font-medium text-center transition-all duration-200 transform hover:scale-105 shadow-lg">
+                            Mulai Belajar
+                        </a>
+                        <a href="#materi" class="px-7 py-3.5 border border-primary text-primary dark:text-primary-light dark:border-primary-light rounded-lg font-medium text-center transition-all duration-200">
+                            Lihat Materi
+                        </a>
                     </div>
-                    <div>
-                        <div class="text-3xl font-bold text-primary dark:text-primary-light">95%</div>
-                        <div class="text-sm text-gray-600 dark:text-gray-400">Tingkat Kepuasan</div>
+                    
+                    <div class="grid grid-cols-3 gap-8">
+                        <div class="text-center">
+                            <div class="text-3xl font-bold gradient-text">10K+</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Siswa Aktif</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold gradient-text">50+</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Materi Pembelajaran</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="text-3xl font-bold gradient-text">95%</div>
+                            <div class="text-sm text-gray-600 dark:text-gray-400">Tingkat Kepuasan</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="order-1 md:order-2 flex justify-center">
+                    <div class="relative">
+                        <div class="absolute inset-0 bg-gradient-to-tr from-primary to-secondary opacity-20 dark:opacity-10 rounded-3xl blur-2xl transform rotate-6"></div>
+                        <img src="https://cdni.iconscout.com/illustration/premium/thumb/frontend-developer-illustration-download-in-svg-png-gif-file-formats--development-team-coding-pack-illustrations-6505574.png"
+                             class="relative w-full max-w-md drop-shadow-2xl transform hover:scale-105 transition-transform duration-500 float-element">
                     </div>
                 </div>
             </div>
-
-            <div class="flex-1 flex justify-center relative" data-aos="fade-left">
-                <div class="relative animate-float">
-                    <div class="absolute inset-0 bg-gradient-to-tr from-primary to-primary-light opacity-20 dark:opacity-10 rounded-3xl blur-2xl transform rotate-6"></div>
-                    <img src="https://cdni.iconscout.com/illustration/premium/thumb/frontend-developer-illustration-download-in-svg-png-gif-file-formats--development-team-coding-pack-illustrations-6505574.png"
-                         class="relative w-full max-w-md drop-shadow-2xl transform hover:scale-105 transition-transform duration-500">
-                </div>
-            </div>
-
         </div>
     </section>
-
-    {{-- MATERI --}}
-    <section id="materi" class="py-24 bg-gray-50 dark:bg-gray-800">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-16" data-aos="fade-up">
-                <h2 class="text-4xl font-bold mb-3">Materi <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-light">Front-End</span></h2>
+    
+    <!-- MATERI -->
+    <section id="materi" class="py-20 bg-gray-50 dark:bg-gray-800">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">Materi <span class="gradient-text">Front-End</span></h2>
                 <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Dasar kuat, skill naik cepat. Materi dirancang oleh praktisi industri dengan pengalaman bertahun-tahun.</p>
             </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                @php
-                    $materi = [
-                        ['HTML Fundamental', 'Struktur dasar website', '🏗️'],
-                        ['CSS Styling & Layout', 'Desain tampilan website', '🎨'],
-                        ['Responsive Design', 'Website adaptif di semua device', '📱'],
-                        ['JavaScript Basics', 'Logika pemrograman web', '⚙️'],
-                        ['DOM Manipulation', 'Interaksi dinamis dengan HTML', '🔧'],
-                        ['API & Fetch', 'Integrasi dengan backend', '🔌'],
-                        ['Tailwind Framework', 'CSS modern dengan utility-first', '🚀'],
-                        ['Git & Deployment', 'Version control dan hosting', '🚢']
-                    ];
-                @endphp
-
-                @foreach ($materi as $index => $m)
-                    <div class="group p-8 bg-white dark:bg-gray-900 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 border border-gray-100 dark:border-gray-700" data-aos="fade-up" data-aos-delay="{{ $index * 100 }}">
-                        <div class="text-4xl mb-4">{{ $m[2] }}</div>
-                        <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 group-hover:text-primary dark:group-hover:text-primary-light transition-colors">{{ $m[0] }}</h3>
-                        <p class="text-gray-600 dark:text-gray-400 text-sm">{{ $m[1] }}</p>
-                        <div class="mt-4 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
-                            <div class="bg-primary dark:bg-primary-light h-2 rounded-full transition-all duration-500" style="width: {{ rand(60, 100) }}%"></div>
-                        </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-5 gap-6">
+                <!-- Module 1 -->
+                <div class="module-card bg-white dark:bg-gray-900 rounded-xl shadow-md hover:shadow-xl p-6 card-hover" data-aos="fade-up" data-aos-delay="100">
+                    <div class="text-3xl mb-4">🏗️</div>
+                    <h3 class="text-lg font-semibold mb-2">Modul 1</h3>
+                    <p class="font-medium gradient-text">Kenalan Dengan Website</p>
+                    <div class="mt-4 progress-bar">
+                        <div class="progress-fill" style="width: 100%"></div>
                     </div>
-                @endforeach
-
+                </div>
+                
+                <!-- Module 2 -->
+                <div class="module-card bg-white dark:bg-gray-900 rounded-xl shadow-md hover:shadow-xl p-6 card-hover" data-aos="fade-up" data-aos-delay="200">
+                    <div class="text-3xl mb-4">📄</div>
+                    <h3 class="text-lg font-semibold mb-2">Modul 2</h3>
+                    <p class="font-medium gradient-text">HTML Dasar</p>
+                    <div class="mt-4 progress-bar">
+                        <div class="progress-fill" style="width: 90%"></div>
+                    </div>
+                </div>
+                
+                <!-- Module 3 -->
+                <div class="module-card bg-white dark:bg-gray-900 rounded-xl shadow-md hover:shadow-xl p-6 card-hover" data-aos="fade-up" data-aos-delay="300">
+                    <div class="text-3xl mb-4">🎨</div>
+                    <h3 class="text-lg font-semibold mb-2">Modul 3</h3>
+                    <p class="font-medium gradient-text">CSS Dasar</p>
+                    <div class="mt-4 progress-bar">
+                        <div class="progress-fill" style="width: 80%"></div>
+                    </div>
+                </div>
+                
+                <!-- Module 4 -->
+                <div class="module-card bg-white dark:bg-gray-900 rounded-xl shadow-md hover:shadow-xl p-6 card-hover" data-aos="fade-up" data-aos-delay="400">
+                    <div class="text-3xl mb-4">📐</div>
+                    <h3 class="text-lg font-semibold mb-2">Modul 4</h3>
+                    <p class="font-medium gradient-text">Layout Dasar</p>
+                    <div class="mt-4 progress-bar">
+                        <div class="progress-fill" style="width: 70%"></div>
+                    </div>
+                </div>
+                
+                <!-- Module 5 -->
+                <div class="module-card bg-white dark:bg-gray-900 rounded-xl shadow-md hover:shadow-xl p-6 card-hover" data-aos="fade-up" data-aos-delay="500">
+                    <div class="text-3xl mb-4">📱</div>
+                    <h3 class="text-lg font-semibold mb-2">Modul 5</h3>
+                    <p class="font-medium gradient-text">Responsive Dasar</p>
+                    <div class="mt-4 progress-bar">
+                        <div class="progress-fill" style="width: 60%"></div>
+                    </div>
+                </div>
+                
+                <!-- Module 6 -->
+                <div class="module-card bg-white dark:bg-gray-900 rounded-xl shadow-md hover:shadow-xl p-6 card-hover" data-aos="fade-up" data-aos-delay="600">
+                    <div class="text-3xl mb-4">⚙️</div>
+                    <h3 class="text-lg font-semibold mb-2">Modul 6</h3>
+                    <p class="font-medium gradient-text">JavaScript Dasar Banget</p>
+                    <div class="mt-4 progress-bar">
+                        <div class="progress-fill" style="width: 50%"></div>
+                    </div>
+                </div>
+                
+                <!-- Module 7 -->
+                <div class="module-card bg-white dark:bg-gray-900 rounded-xl shadow-md hover:shadow-xl p-6 card-hover" data-aos="fade-up" data-aos-delay="700">
+                    <div class="text-3xl mb-4">🎮</div>
+                    <h3 class="text-lg font-semibold mb-2">Modul 7</h3>
+                    <p class="font-medium gradient-text">JavaScript Interaktif</p>
+                    <div class="mt-4 progress-bar">
+                        <div class="progress-fill" style="width: 40%"></div>
+                    </div>
+                </div>
+                
+                <!-- Module 8 -->
+                <div class="module-card bg-white dark:bg-gray-900 rounded-xl shadow-md hover:shadow-xl p-6 card-hover" data-aos="fade-up" data-aos-delay="800">
+                    <div class="text-3xl mb-4">🔧</div>
+                    <h3 class="text-lg font-semibold mb-2">Modul 8</h3>
+                    <p class="font-medium gradient-text">Git Pemula</p>
+                    <div class="mt-4 progress-bar">
+                        <div class="progress-fill" style="width: 30%"></div>
+                    </div>
+                </div>
+                
+                <!-- Module 9 -->
+                <div class="module-card bg-white dark:bg-gray-900 rounded-xl shadow-md hover:shadow-xl p-6 card-hover" data-aos="fade-up" data-aos-delay="900">
+                    <div class="text-3xl mb-4">🚀</div>
+                    <h3 class="text-lg font-semibold mb-2">Modul 9</h3>
+                    <p class="font-medium gradient-text">CSS Framework Dasar</p>
+                    <div class="mt-4 progress-bar">
+                        <div class="progress-fill" style="width: 20%"></div>
+                    </div>
+                </div>
+                
+                <!-- Module 10 -->
+                <div class="module-card bg-white dark:bg-gray-900 rounded-xl shadow-md hover:shadow-xl p-6 card-hover" data-aos="fade-up" data-aos-delay="1000">
+                    <div class="text-3xl mb-4">🏆</div>
+                    <h3 class="text-lg font-semibold mb-2">Modul 10</h3>
+                    <p class="font-medium gradient-text">Mini Project Pemula</p>
+                    <div class="mt-4 progress-bar">
+                        <div class="progress-fill" style="width: 10%"></div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
-
-    {{-- PROJECT --}}
-    <section id="project" class="py-24 bg-white dark:bg-gray-900">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-16" data-aos="fade-up">
-                <h2 class="text-4xl font-bold mb-3">Project <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-light">Nyata</span></h2>
-                <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Belajar lewat project biar langsung kepake. Project dirancang untuk membangun portofolio yang mengesankan.</p>
-            </div>
-
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-                @php
-                    $project = [
-                        ['Landing Page Modern', 'UI/UX, Responsive', 'https://picsum.photos/seed/landing/400/250.jpg'],
-                        ['Portfolio Website', 'Personal Branding', 'https://picsum.photos/seed/portfolio/400/250.jpg'],
-                        ['Mini E-Commerce UI', 'Product Showcase', 'https://picsum.photos/seed/ecommerce/400/250.jpg'],
-                        ['Dashboard Admin UI', 'Data Visualization', 'https://picsum.photos/seed/dashboard/400/250.jpg']
-                    ];
-                @endphp
-
-                @foreach ($project as $index => $p)
-                    <div class="group overflow-hidden rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2" data-aos="zoom-in" data-aos-delay="{{ $index * 100 }}">
-                        <div class="aspect-w-16 aspect-h-9 bg-gray-200 dark:bg-gray-700 overflow-hidden">
-                            <img src="{{ $p[2] }}" alt="{{ $p[0] }}" class="w-full h-48 object-cover group-hover:scale-110 transition-transform duration-500">
-                        </div>
-                        <div class="p-6 bg-white dark:bg-gray-900">
-                            <h3 class="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2 group-hover:text-primary dark:group-hover:text-primary-light transition-colors">{{ $p[0] }}</h3>
-                            <p class="text-gray-600 dark:text-gray-400 text-sm mb-4">{{ $p[1] }}</p>
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    {{ rand(8, 24) }} jam
-                                </div>
-                                <a href="#" class="text-primary dark:text-primary-light font-medium text-sm hover:underline">Lihat Detail →</a>
-                            </div>
-                        </div>
-                    </div>
-                @endforeach
-
-            </div>
-        </div>
-    </section>
-
-    {{-- KELAS --}}
-    <section id="kelas" class="py-24 bg-gray-50 dark:bg-gray-800">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-16" data-aos="fade-up">
-                <h2 class="text-4xl font-bold mb-3">Kelas <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-light">Unggulan</span></h2>
+    
+    <!-- KELAS -->
+    <section id="kelas" class="py-20 bg-white dark:bg-gray-900">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">Kelas <span class="gradient-text">Unggulan</span></h2>
                 <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Dipandu step-by-step biar makin paham. Dapatkan sertifikat setelah menyelesaikan kelas.</p>
             </div>
-
-            <div class="grid md:grid-cols-3 gap-10">
-                @php
-                    $kelas = [
-                        ['Front-End Dasar', 'Belajar HTML, CSS, JavaScript dari nol.', 'beginner', '4 minggu'],
-                        ['Tailwind Mastery', 'Bikin UI modern dengan cepat.', 'intermediate', '3 minggu'],
-                        ['JavaScript Intensive', 'Latihan logika & mini project.', 'intermediate', '5 minggu'],
-                        ['Responsive Masterclass', 'Website rapi di semua device.', 'intermediate', '2 minggu'],
-                        ['Portfolio Build', 'Bangun website personal profesional.', 'advanced', '4 minggu'],
-                        ['Frontend Roadmap', 'Jalur lengkap menuju siap kerja.', 'all', '8 minggu']
-                    ];
-                @endphp
-
-                @foreach ($kelas as $index => $c)
-                    <div class="group bg-white dark:bg-gray-900 rounded-2xl shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2 overflow-hidden" data-aos="fade-up" data-aos-delay="{{ $index * 100 }}">
-                        <div class="h-2 bg-gradient-to-r from-primary to-primary-light"></div>
-                        <div class="p-8">
-                            <div class="flex items-center justify-between mb-4">
-                                <span class="px-3 py-1 text-xs font-medium rounded-full
-                                    @if($c[2] === 'beginner') bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                    @elseif($c[2] === 'intermediate') bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
-                                    @elseif($c[2] === 'advanced') bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
-                                    @else bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-200 @endif">
-                                    @if($c[2] === 'beginner') Pemula
-                                    @elseif($c[2] === 'intermediate') Menengah
-                                    @elseif($c[2] === 'advanced') Lanjutan
-                                    @else Semua Level @endif
-                                </span>
-                                <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                    </svg>
-                                    {{ $c[3] }}
-                                </div>
-                            </div>
-                            <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2 group-hover:text-primary dark:group-hover:text-primary-light transition-colors">{{ $c[0] }}</h3>
-                            <p class="text-gray-600 dark:text-gray-400 mb-6">{{ $c[1] }}</p>
-                            <div class="flex items-center justify-between">
-                                <div class="flex items-center">
-                                    <div class="flex -space-x-2">
-                                        <img class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-900" src="https://picsum.photos/seed/user1/100/100.jpg" alt="">
-                                        <img class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-900" src="https://picsum.photos/seed/user2/100/100.jpg" alt="">
-                                        <img class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-900" src="https://picsum.photos/seed/user3/100/100.jpg" alt="">
-                                    </div>
-                                    <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">{{ rand(50, 200) }}+ siswa</span>
-                                </div>
-                                <a href="#" class="text-primary dark:text-primary-light font-medium text-sm hover:underline">Daftar →</a>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Kelas 1 -->
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2" data-aos="fade-up" data-aos-delay="100">
+                    <div class="h-2 bg-gradient-to-r from-primary to-secondary"></div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+                                Pemula
+                            </span>
+                            <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                4 minggu
                             </div>
                         </div>
+                        <h3 class="text-xl font-bold mb-2">Front-End Dasar</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-6">Belajar HTML, CSS, JavaScript dari nol.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="flex -space-x-2">
+                                    <img class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800" src="https://picsum.photos/seed/user1/100/100.jpg" alt="">
+                                    <img class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800" src="https://picsum.photos/seed/user2/100/100.jpg" alt="">
+                                    <img class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800" src="https://picsum.photos/seed/user3/100/100.jpg" alt="">
+                                </div>
+                                <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">150+ siswa</span>
+                            </div>
+                            <a href="#" class="text-primary dark:text-primary-light font-medium text-sm hover:underline">Daftar →</a>
+                        </div>
                     </div>
-                @endforeach
-
+                </div>
+                
+                <!-- Kelas 2 -->
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2" data-aos="fade-up" data-aos-delay="200">
+                    <div class="h-2 bg-gradient-to-r from-primary to-secondary"></div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200">
+                                Menengah
+                            </span>
+                            <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                3 minggu
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">Tailwind Mastery</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-6">Bikin UI modern dengan cepat.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="flex -space-x-2">
+                                    <img class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800" src="https://picsum.photos/seed/user4/100/100.jpg" alt="">
+                                    <img class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800" src="https://picsum.photos/seed/user5/100/100.jpg" alt="">
+                                    <img class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800" src="https://picsum.photos/seed/user6/100/100.jpg" alt="">
+                                </div>
+                                <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">120+ siswa</span>
+                            </div>
+                            <a href="#" class="text-primary dark:text-primary-light font-medium text-sm hover:underline">Daftar →</a>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Kelas 3 -->
+                <div class="bg-gray-50 dark:bg-gray-800 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-2" data-aos="fade-up" data-aos-delay="300">
+                    <div class="h-2 bg-gradient-to-r from-primary to-secondary"></div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <span class="px-3 py-1 text-xs font-medium rounded-full bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200">
+                                Lanjutan
+                            </span>
+                            <div class="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                5 minggu
+                            </div>
+                        </div>
+                        <h3 class="text-xl font-bold mb-2">JavaScript Intensive</h3>
+                        <p class="text-gray-600 dark:text-gray-400 mb-6">Latihan logika & mini project.</p>
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center">
+                                <div class="flex -space-x-2">
+                                    <img class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800" src="https://picsum.photos/seed/user7/100/100.jpg" alt="">
+                                    <img class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800" src="https://picsum.photos/seed/user8/100/100.jpg" alt="">
+                                    <img class="w-6 h-6 rounded-full border-2 border-white dark:border-gray-800" src="https://picsum.photos/seed/user9/100/100.jpg" alt="">
+                                </div>
+                                <span class="ml-2 text-sm text-gray-500 dark:text-gray-400">100+ siswa</span>
+                            </div>
+                            <a href="#" class="text-primary dark:text-primary-light font-medium text-sm hover:underline">Daftar →</a>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </section>
-
-    {{-- TESTIMONIALS --}}
-    <section class="py-24 bg-white dark:bg-gray-900">
-        <div class="max-w-7xl mx-auto px-6">
-            <div class="text-center mb-16" data-aos="fade-up">
-                <h2 class="text-4xl font-bold mb-3">Apa Kata <span class="text-transparent bg-clip-text bg-gradient-to-r from-primary to-primary-light">Mereka</span></h2>
+    
+    <!-- TIM KAMI -->
+    <section id="tim" class="py-20 bg-gray-50 dark:bg-gray-800">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">Tim <span class="gradient-text">Kami</span></h2>
+                <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Tim profesional dengan pengalaman bertahun-tahun di industri teknologi.</p>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <!-- Team Member 1 -->
+                <div class="team-card h-96" data-aos="fade-up" data-aos-delay="100">
+                    <div class="team-card-inner">
+                        <div class="team-card-front bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 flex flex-col items-center justify-center">
+                            <img src="https://picsum.photos/seed/team1/300/300.jpg" alt="Ahmad Fauzi" class="w-32 h-32 rounded-full mb-4">
+                            <h3 class="text-xl font-bold mb-1">Ahmad Fauzi</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">Full-Stack Developer</p>
+                            <div class="flex space-x-3">
+                                <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary-light">
+                                    <i class="fab fa-linkedin text-xl"></i>
+                                </a>
+                                <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary-light">
+                                    <i class="fab fa-github text-xl"></i>
+                                </a>
+                                <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary-light">
+                                    <i class="fab fa-twitter text-xl"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="team-card-back bg-gradient-to-br from-primary to-secondary rounded-xl shadow-lg p-6 flex flex-col items-center justify-center text-white">
+                            <p class="text-center mb-4">Pengalaman 8+ tahun di bidang web development. Spesialisasi dalam React, Node.js, dan cloud architecture.</p>
+                            <div class="flex space-x-3">
+                                <a href="#" class="text-white hover:text-gray-200">
+                                    <i class="fab fa-linkedin text-xl"></i>
+                                </a>
+                                <a href="#" class="text-white hover:text-gray-200">
+                                    <i class="fab fa-github text-xl"></i>
+                                </a>
+                                <a href="#" class="text-white hover:text-gray-200">
+                                    <i class="fab fa-twitter text-xl"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Team Member 2 -->
+                <div class="team-card h-96" data-aos="fade-up" data-aos-delay="200">
+                    <div class="team-card-inner">
+                        <div class="team-card-front bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 flex flex-col items-center justify-center">
+                            <img src="https://picsum.photos/seed/team2/300/300.jpg" alt="Siti Nurhaliza" class="w-32 h-32 rounded-full mb-4">
+                            <h3 class="text-xl font-bold mb-1">Siti Nurhaliza</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">Full-Stack Developer</p>
+                            <div class="flex space-x-3">
+                                <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary-light">
+                                    <i class="fab fa-linkedin text-xl"></i>
+                                </a>
+                                <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary-light">
+                                    <i class="fab fa-github text-xl"></i>
+                                </a>
+                                <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary-light">
+                                    <i class="fab fa-twitter text-xl"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="team-card-back bg-gradient-to-br from-primary to-secondary rounded-xl shadow-lg p-6 flex flex-col items-center justify-center text-white">
+                            <p class="text-center mb-4">Pengalaman 6+ tahun di bidang web development. Spesialisasi dalam Vue.js, PHP, dan UI/UX design.</p>
+                            <div class="flex space-x-3">
+                                <a href="#" class="text-white hover:text-gray-200">
+                                    <i class="fab fa-linkedin text-xl"></i>
+                                </a>
+                                <a href="#" class="text-white hover:text-gray-200">
+                                    <i class="fab fa-github text-xl"></i>
+                                </a>
+                                <a href="#" class="text-white hover:text-gray-200">
+                                    <i class="fab fa-twitter text-xl"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Team Member 3 -->
+                <div class="team-card h-96" data-aos="fade-up" data-aos-delay="300">
+                    <div class="team-card-inner">
+                        <div class="team-card-front bg-white dark:bg-gray-900 rounded-xl shadow-lg p-6 flex flex-col items-center justify-center">
+                            <img src="https://picsum.photos/seed/team3/300/300.jpg" alt="Budi Santoso" class="w-32 h-32 rounded-full mb-4">
+                            <h3 class="text-xl font-bold mb-1">Budi Santoso</h3>
+                            <p class="text-gray-600 dark:text-gray-400 mb-4">Full-Stack Developer</p>
+                            <div class="flex space-x-3">
+                                <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary-light">
+                                    <i class="fab fa-linkedin text-xl"></i>
+                                </a>
+                                <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary-light">
+                                    <i class="fab fa-github text-xl"></i>
+                                </a>
+                                <a href="#" class="text-gray-600 dark:text-gray-400 hover:text-primary dark:hover:text-primary-light">
+                                    <i class="fab fa-twitter text-xl"></i>
+                                </a>
+                            </div>
+                        </div>
+                        <div class="team-card-back bg-gradient-to-br from-primary to-secondary rounded-xl shadow-lg p-6 flex flex-col items-center justify-center text-white">
+                            <p class="text-center mb-4">Pengalaman 7+ tahun di bidang web development. Spesialisasi dalam Angular, Python, dan DevOps.</p>
+                            <div class="flex space-x-3">
+                                <a href="#" class="text-white hover:text-gray-200">
+                                    <i class="fab fa-linkedin text-xl"></i>
+                                </a>
+                                <a href="#" class="text-white hover:text-gray-200">
+                                    <i class="fab fa-github text-xl"></i>
+                                </a>
+                                <a href="#" class="text-white hover:text-gray-200">
+                                    <i class="fab fa-twitter text-xl"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- TESTIMONIALS -->
+    <section class="py-20 bg-white dark:bg-gray-900">
+        <div class="container mx-auto px-6">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">Apa Kata <span class="gradient-text">Mereka</span></h2>
                 <p class="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">Dengar langsung dari alumni yang telah berhasil memulai karir sebagai Front-End Developer.</p>
             </div>
-
+            
             <div class="grid md:grid-cols-3 gap-8">
-                <div class="bg-gray-50 dark:bg-gray-800 p-8 rounded-2xl" data-aos="fade-up" data-aos-delay="100">
+                <!-- Testimonial 1 -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl" data-aos="fade-up" data-aos-delay="100">
                     <div class="flex items-center mb-4">
                         <img src="https://picsum.photos/seed/testimonial1/100/100.jpg" alt="" class="w-12 h-12 rounded-full mr-4">
                         <div>
@@ -335,8 +895,9 @@
                     </div>
                     <p class="text-gray-700 dark:text-gray-300">"FrontEndClass benar-benar mengubah karir saya. Dari tidak tahu apa-apa tentang coding menjadi seorang UI/UX Designer dalam 6 bulan!"</p>
                 </div>
-
-                <div class="bg-gray-50 dark:bg-gray-800 p-8 rounded-2xl" data-aos="fade-up" data-aos-delay="200">
+                
+                <!-- Testimonial 2 -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl" data-aos="fade-up" data-aos-delay="200">
                     <div class="flex items-center mb-4">
                         <img src="https://picsum.photos/seed/testimonial2/100/100.jpg" alt="" class="w-12 h-12 rounded-full mr-4">
                         <div>
@@ -353,8 +914,9 @@
                     </div>
                     <p class="text-gray-700 dark:text-gray-300">"Project-based learning di FrontEndClass sangat efektif. Saya langsung bisa apply ilmu yang dipelajari untuk membangun portofolio saya."</p>
                 </div>
-
-                <div class="bg-gray-50 dark:bg-gray-800 p-8 rounded-2xl" data-aos="fade-up" data-aos-delay="300">
+                
+                <!-- Testimonial 3 -->
+                <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-xl" data-aos="fade-up" data-aos-delay="300">
                     <div class="flex items-center mb-4">
                         <img src="https://picsum.photos/seed/testimonial3/100/100.jpg" alt="" class="w-12 h-12 rounded-full mr-4">
                         <div>
@@ -374,10 +936,10 @@
             </div>
         </div>
     </section>
-
-    {{-- CTA --}}
-    <section class="py-24 bg-gradient-to-r from-primary to-primary-dark">
-        <div class="max-w-4xl mx-auto px-6 text-center" data-aos="zoom-in">
+    
+    <!-- CTA -->
+    <section class="py-20 bg-gradient-to-r from-primary to-secondary">
+        <div class="container mx-auto px-6 text-center">
             <h2 class="text-4xl font-bold text-white mb-6">Siap Memulai Karir sebagai Front-End Developer?</h2>
             <p class="text-xl text-white/90 mb-8 max-w-2xl mx-auto">Bergabunglah dengan ribuan siswa yang telah berhasil memulai karir di dunia teknologi.</p>
             <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -390,39 +952,31 @@
             </div>
         </div>
     </section>
-
-    {{-- FOOTER --}}
+    
+    <!-- FOOTER -->
     <footer class="bg-gray-900 text-gray-400 py-16">
-        <div class="max-w-7xl mx-auto px-6">
+        <div class="container mx-auto px-6">
             <div class="grid md:grid-cols-4 gap-8 mb-12">
-                <div data-aos="fade-up">
+                <div>
                     <h3 class="text-2xl font-bold text-white mb-4">FrontEndClass</h3>
                     <p class="text-gray-500 mb-4">Platform pembelajaran Front-End Development terbaik untuk memulai karir di dunia teknologi.</p>
                     <div class="flex space-x-4">
                         <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                            </svg>
+                            <i class="fab fa-facebook text-xl"></i>
                         </a>
                         <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
-                            </svg>
+                            <i class="fab fa-twitter text-xl"></i>
                         </a>
                         <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1112.324 0 6.162 6.162 0 01-12.324 0zM12 16a4 4 0 110-8 4 4 0 010 8zm4.965-10.405a1.44 1.44 0 112.881.001 1.44 1.44 0 01-2.881-.001z"/>
-                            </svg>
+                            <i class="fab fa-instagram text-xl"></i>
                         </a>
                         <a href="#" class="text-gray-400 hover:text-white transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
-                            </svg>
+                            <i class="fab fa-github text-xl"></i>
                         </a>
                     </div>
                 </div>
-
-                <div data-aos="fade-up" data-aos-delay="100">
+                
+                <div>
                     <h4 class="text-lg font-semibold text-white mb-4">Platform</h4>
                     <ul class="space-y-2">
                         <li><a href="#" class="hover:text-white transition-colors">Tentang Kami</a></li>
@@ -431,8 +985,8 @@
                         <li><a href="#" class="hover:text-white transition-colors">Partner</a></li>
                     </ul>
                 </div>
-
-                <div data-aos="fade-up" data-aos-delay="200">
+                
+                <div>
                     <h4 class="text-lg font-semibold text-white mb-4">Kelas</h4>
                     <ul class="space-y-2">
                         <li><a href="#" class="hover:text-white transition-colors">Front-End Dasar</a></li>
@@ -441,8 +995,8 @@
                         <li><a href="#" class="hover:text-white transition-colors">Vue.js Fundamental</a></li>
                     </ul>
                 </div>
-
-                <div data-aos="fade-up" data-aos-delay="300">
+                
+                <div>
                     <h4 class="text-lg font-semibold text-white mb-4">Bantuan</h4>
                     <ul class="space-y-2">
                         <li><a href="#" class="hover:text-white transition-colors">FAQ</a></li>
@@ -452,7 +1006,7 @@
                     </ul>
                 </div>
             </div>
-
+            
             <div class="border-t border-gray-800 pt-8 flex flex-col md:flex-row justify-between items-center">
                 <p class="text-gray-500 text-sm">
                     © {{ date('Y') }} FrontEndClass. All rights reserved.
@@ -464,18 +1018,66 @@
             </div>
         </div>
     </footer>
-
+    
     <script>
+        // Konfigurasi Tailwind untuk Dark Mode
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'primary': '#6366f1',
+                        'primary-dark': '#4f46e5',
+                        'primary-light': '#818cf8',
+                        'secondary': '#ec4899',
+                        'accent': '#14b8a6',
+                    },
+                    animation: {
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0px)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+        
         // Initialize AOS
         AOS.init({
             duration: 1000,
             once: true
         });
-
+        
+        // Custom cursor
+        const cursor = document.querySelector('.custom-cursor');
+        
+        document.addEventListener('mousemove', (e) => {
+            cursor.style.left = e.clientX + 'px';
+            cursor.style.top = e.clientY + 'px';
+        });
+        
+        document.addEventListener('mousedown', () => {
+            cursor.classList.add('cursor-grow');
+        });
+        
+        document.addEventListener('mouseup', () => {
+            cursor.classList.remove('cursor-grow');
+        });
+        
+        // Loading screen
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.querySelector('.loader-wrapper').style.display = 'none';
+            }, 1500);
+        });
+        
         // Theme toggle
         var themeToggleDarkIcon = document.getElementById('theme-toggle-dark-icon');
         var themeToggleLightIcon = document.getElementById('theme-toggle-light-icon');
-
+        
         // Change the icons inside the button based on previous settings
         if (localStorage.getItem('color-theme') === 'dark' || (!('color-theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
             themeToggleLightIcon.classList.remove('hidden');
@@ -484,14 +1086,14 @@
             themeToggleLightIcon.classList.add('hidden');
             themeToggleDarkIcon.classList.remove('hidden');
         }
-
+        
         var themeToggleBtn = document.getElementById('theme-toggle');
-
+        
         themeToggleBtn.addEventListener('click', function() {
             // toggle icons inside button
             themeToggleDarkIcon.classList.toggle('hidden');
             themeToggleLightIcon.classList.toggle('hidden');
-
+            
             // if set via local storage previously
             if (localStorage.getItem('color-theme')) {
                 if (localStorage.getItem('color-theme') === 'light') {
@@ -511,23 +1113,23 @@
                 }
             }
         });
-
+        
         // Mobile menu toggle
         document.getElementById('mobileMenuBtn').addEventListener('click', function() {
             const mobileMenu = document.getElementById('mobileMenu');
             mobileMenu.classList.toggle('hidden');
         });
-
+        
         // Navbar scroll effect
         window.addEventListener('scroll', function() {
             const navbar = document.getElementById('navbar');
             if (window.scrollY > 50) {
-                navbar.classList.add('shadow-lg');
+                navbar.classList.add('shadow-lg', 'bg-white/90', 'dark:bg-gray-900/90');
             } else {
-                navbar.classList.remove('shadow-lg');
+                navbar.classList.remove('shadow-lg', 'bg-white/90', 'dark:bg-gray-900/90');
             }
         });
-
+        
         // Smooth scrolling for anchor links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
@@ -541,5 +1143,87 @@
                 }
             });
         });
+        
+        // GSAP Animations
+        gsap.registerPlugin(ScrollTrigger);
+        
+        // Hero animation
+        gsap.from('.hero-title', {
+            y: 50,
+            opacity: 0,
+            duration: 1,
+            delay: 1.5
+        });
+        
+        gsap.from('.hero-subtitle', {
+            y: 30,
+            opacity: 0,
+            duration: 1,
+            delay: 1.8
+        });
+        
+        gsap.from('.hero-buttons', {
+            y: 30,
+            opacity: 0,
+            duration: 1,
+            delay: 2.1
+        });
+        
+        // Module cards animation
+        gsap.utils.toArray('.module-card').forEach((card, index) => {
+            gsap.from(card, {
+                scrollTrigger: {
+                    trigger: card,
+                    start: 'top 80%',
+                    toggleActions: 'play none none none'
+                },
+                y: 50,
+                opacity: 0,
+                duration: 0.8,
+                delay: index * 0.1
+            });
+        });
+        
+        // Team cards animation
+        gsap.utils.toArray('.team-card').forEach((card, index) => {
+            gsap.from(card, {
+                scrollTrigger: {
+                    trigger: card,
+                    start: 'top 80%',
+                    toggleActions: 'play none none none'
+                },
+                y: 50,
+                opacity: 0,
+                duration: 0.8,
+                delay: index * 0.1
+            });
+        });
+        
+        // Testimonial cards animation
+        gsap.utils.toArray('.testimonial-card').forEach((card, index) => {
+            gsap.from(card, {
+                scrollTrigger: {
+                    trigger: card,
+                    start: 'top 80%',
+                    toggleActions: 'play none none none'
+                },
+                y: 50,
+                opacity: 0,
+                duration: 0.8,
+                delay: index * 0.1
+            });
+        });
+        
+        // Floating animation for elements
+        gsap.utils.toArray('.float-element').forEach(element => {
+            gsap.to(element, {
+                y: -20,
+                duration: 2,
+                ease: 'power1.inOut',
+                repeat: -1,
+                yoyo: true
+            });
+        });
     </script>
 </body>
+</html>

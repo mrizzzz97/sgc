@@ -10,7 +10,7 @@ use Illuminate\Validation\Rules;
 class ProfileController extends Controller
 {
     /**
-     * Show profile edit page
+     * Halaman profil untuk murid/admin/guru.
      */
     public function edit(Request $request)
     {
@@ -20,7 +20,17 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update profile (name & email)
+     * Halaman profil khusus guru (separated view).
+     */
+    public function editGuruProfile(Request $request)
+    {
+        return view('guru.profile.edit', [
+            'user' => $request->user(),
+        ]);
+    }
+
+    /**
+     * Update nama & email.
      */
     public function update(Request $request)
     {
@@ -37,33 +47,32 @@ class ProfileController extends Controller
     }
 
     /**
-     * Update password (PASTI BERHASIL)
+     * Update password.
      */
     public function updatePassword(Request $request)
     {
-        $user = $request->user();
-
         $request->validate([
             'current_password' => ['required'],
             'new_password'     => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
-        // Validasi password lama
+        $user = $request->user();
+
         if (!Hash::check($request->current_password, $user->password)) {
             return back()->withErrors([
-                'current_password' => 'Password lama salah!',
+                'current_password' => 'Password lama salah.',
             ]);
         }
 
-        // WAJIB: assign langsung agar tidak terblokir fillable
-        $user->password = Hash::make($request->new_password);
-        $user->save();
+        $user->update([
+            'password' => Hash::make($request->new_password)
+        ]);
 
         return back()->with('success', 'Password berhasil diperbarui.');
     }
 
     /**
-     * Delete account
+     * Hapus akun.
      */
     public function destroy(Request $request)
     {
@@ -75,7 +84,7 @@ class ProfileController extends Controller
 
         if (!Hash::check($request->delete_password, $user->password)) {
             return back()->withErrors([
-                'delete_password' => 'Password salah!',
+                'delete_password' => 'Password salah.',
             ]);
         }
 

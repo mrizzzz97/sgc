@@ -19,14 +19,58 @@ class MuridDashboardController extends Controller
     {
         $user = Auth::user();
 
-        // ===============================
-        // 1. MODUL SELESAI
-        // ===============================
-        $modul_selesai = ChapterCompletion::where('user_id', $user->id)->count();
+        // =====================================================================
+        // 1. HITUNG MODUL SELESAI (REAL)
+        // =====================================================================
+        $modules = Module::with('chapters')->get();
 
-        // ===============================
-        // 2. TUGAS PENDING
-        // ===============================
+        $modul_selesai = 0;
+        $modules_progress = [];
+
+        foreach ($modules as $modul) {
+
+            $total_chapters = $modul->chapters->count();
+
+            $completed_chapters = ChapterCompletion::where('user_id', $user->id)
+                ->whereIn('chapter_id', $modul->chapters->pluck('id'))
+                ->count();
+
+            if ($total_chapters > 0 && $completed_chapters == $total_chapters) {
+                $modul_selesai++;
+            }
+
+            $percent = $total_chapters > 0
+                ? round(($completed_chapters / $total_chapters) * 100)
+                : 0;
+
+            $modules_progress[] = [
+                'id' => $modul->id,
+                'title' => $modul->title,
+                'completed' => $completed_chapters,
+                'total_chapters' => $total_chapters,
+                'percent' => $percent,
+            ];
+        }
+
+        // =====================================================================
+        // 2. HITUNG XP & LEVEL
+        // =====================================================================
+        $xp_per_modul = 100;
+        $xp_total = $modul_selesai * $xp_per_modul;
+
+        // Naik level setiap 500 XP
+        $level = 1 + floor($xp_total / 500);
+
+        // Progress menuju level berikutnya
+        $xp_for_next = $level * 500;
+        $xp_progress = min(100, round(($xp_total / $xp_for_next) * 100));
+
+        // Ranking (placeholder)
+        $rank = '-';
+
+        // =====================================================================
+        // 3. TUGAS PENDING
+        // =====================================================================
         $tugas_pending = Question::leftJoin('answers', function ($join) use ($user) {
                 $join->on('questions.id', '=', 'answers.question_id')
                      ->where('answers.user_id', $user->id);
@@ -34,43 +78,9 @@ class MuridDashboardController extends Controller
             ->whereNull('answers.id')
             ->count();
 
-        // ===============================
-        // 3. XP & LEVEL (sementara dummy)
-        // ===============================
-        $xp_total = 0;
-        $level = 1;
-        $xp_progress = 0;
-        $rank = 1;
-
-        // ===============================
-        // 4. PROGRESS SETIAP MODUL
-        // ===============================
-        $modules_progress = [];
-        $modules = Module::with('chapters')->get();
-
-        foreach ($modules as $m) {
-            $chapterIds = $m->chapters->pluck('id');
-            $total_chapters = $chapterIds->count();
-
-            $completed = ChapterCompletion::where('user_id', $user->id)
-                ->whereIn('chapter_id', $chapterIds)
-                ->count();
-
-            $percent = $total_chapters > 0
-                ? round(($completed / $total_chapters) * 100)
-                : 0;
-
-            $modules_progress[] = [
-                'title' => $m->title,
-                'completed' => $completed,
-                'total_chapters' => $total_chapters,
-                'percent' => $percent,
-            ];
-        }
-
-        // ===============================
-        // 5. TUGAS TERBARU
-        // ===============================
+        // =====================================================================
+        // 4. TUGAS TERBARU
+        // =====================================================================
         $latest_tasks = Question::leftJoin('chapters', 'questions.chapter_id', '=', 'chapters.id')
             ->leftJoin('modules', 'chapters.module_id', '=', 'modules.id')
             ->leftJoin('answers', function ($join) use ($user) {
@@ -88,51 +98,35 @@ class MuridDashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // ===============================
-        // 6. BADGES (placeholder aman)
-        // ===============================
+        // =====================================================================
+        // 5. BADGES (placeholder)
+        // =====================================================================
         $badges = [];
 
-        // ===============================
-        // 7. KIRIM KE VIEW
-        // ===============================
+        // =====================================================================
+        // 6. KIRIM DATA KE VIEW
+        // =====================================================================
         return view('dashboard.murid', [
             'user' => $user,
+
+            // Modul & progress
             'modul_selesai' => $modul_selesai,
-            'tugas_pending' => $tugas_pending,
-            'rank' => $rank,
+            'modules_progress' => $modules_progress,
+
+            // XP dan level
             'xp_total' => $xp_total,
             'level' => $level,
+            'xp_for_next' => $xp_for_next,
             'xp_progress' => $xp_progress,
-            'modules_progress' => $modules_progress,
+            'rank' => $rank,
+
+            // Tugas
+            'tugas_pending' => $tugas_pending,
             'latest_tasks' => $latest_tasks,
+
+            // Badges
             'badges' => $badges,
         ]);
-    }
-
-    /**
-     * Halaman daftar tugas murid
-     */
-    public function tugas()
-    {
-        $user = Auth::user();
-
-        // Tugas belum dikerjakan
-        $pending = Question::leftJoin('answers', function ($join) use ($user) {
-                $join->on('questions.id', '=', 'answers.question_id')
-                     ->where('answers.user_id', $user->id);
-            })
-            ->whereNull('answers.id')
-            ->select('questions.*')
-            ->get();
-
-        // Tugas sudah dikerjakan
-        $done = Answer::where('answers.user_id', $user->id)
-            ->join('questions', 'answers.question_id', '=', 'questions.id')
-            ->select('questions.*', 'answers.created_at as answered_at')
-            ->get();
-
-        return view('dashboard.tugas', compact('pending', 'done'));
     }
 
     /**

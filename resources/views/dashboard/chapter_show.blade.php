@@ -28,13 +28,11 @@
         {!! nl2br(e($chapter->content)) !!}
     </div>
 
-    {{-- TOMBOL COMPLETE --}}
-    <form action="{{ route('modules.chapter.complete', $chapter->id) }}" method="POST">
-        @csrf
-        <button class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow">
-            Tandai Selesai
-        </button>
-    </form>
+    {{-- MASUK KE CHAPTER (pakai route murid) --}}
+    <a href="{{ route('murid.modules.chapter', $chapter->id) }}"
+       class="inline-block px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg shadow">
+        Mulai Chapter
+    </a>
 
 </div>
 @endsection

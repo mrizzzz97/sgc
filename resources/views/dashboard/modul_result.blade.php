@@ -68,7 +68,7 @@
                 Anda berhak mendapatkan sertifikat penyelesaian modul.
             </div>
 
-            <a href="{{ route('modules.certificate', $module->id) }}"
+            <a href="{{ route('murid.modules.certificate', $module->id) }}"
                 class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
                 Unduh Sertifikat (PDF)
             </a>

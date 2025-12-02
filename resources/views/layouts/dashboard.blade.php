@@ -5,34 +5,23 @@
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title>@yield('title', 'SGC Dashboard')</title>
 
-    <!-- Tailwind CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
 
-    <!-- FIX: Dark mode Tailwind -->
     <script>
-        tailwind.config = {
-            darkMode: 'class',
-        }
+        tailwind.config = { darkMode: 'class' }
     </script>
 
-    <!-- Icons -->
     <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
-    <!-- Apply saved theme BEFORE render -->
     <script>
         (function () {
             try {
                 const theme = localStorage.getItem('theme');
-                if (theme === 'dark') {
+                if (theme === 'dark') document.documentElement.classList.add('dark');
+                else if (theme === 'light') document.documentElement.classList.remove('dark');
+                else if (window.matchMedia('(prefers-color-scheme: dark)').matches)
                     document.documentElement.classList.add('dark');
-                } else if (theme === 'light') {
-                    document.documentElement.classList.remove('dark');
-                } else {
-                    if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
-                        document.documentElement.classList.add('dark');
-                    }
-                }
             } catch (e) {}
         })();
     </script>
@@ -44,10 +33,7 @@
             font-weight: 600;
         }
         .nav-active i { color: inherit !important; }
-
-        * {
-            transition: background-color .25s ease, color .25s ease, border-color .25s ease;
-        }
+        * { transition: all .25s ease; }
     </style>
 </head>
 
@@ -58,7 +44,7 @@
     <div class="lg:hidden fixed top-0 left-0 w-full flex items-center justify-between px-4 py-3
                 bg-white dark:bg-gray-800 shadow z-50">
         <button id="openSidebar"
-            class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
+            class="p-2 rounded-lg bg-gray-200 dark:bg-gray-700">
             <i class="fas fa-bars"></i>
         </button>
 
@@ -74,14 +60,14 @@
 
     <div class="flex min-h-screen">
 
-        <!-- SIDEBAR DESKTOP -->
+        <!-- DESKTOP SIDEBAR -->
         <aside class="hidden lg:flex flex-col w-72 bg-white dark:bg-gray-800 border-r dark:border-gray-700
                       p-6 sticky top-0 h-screen overflow-auto">
 
             <div class="flex items-center gap-3 mb-8">
                 <img src="{{ asset('img/sgc-logo.png') }}" class="w-10 h-10 rounded-md shadow-sm">
                 <div>
-                    <h2 class="font-bold text-lg text-gray-900 dark:text-white">SGC</h2>
+                    <h2 class="font-bold text-lg dark:text-white">SGC</h2>
                     <p class="text-sm text-gray-500 dark:text-gray-400">Front-End Class</p>
                 </div>
             </div>
@@ -90,38 +76,27 @@
 
                 <a href="{{ route('murid.dashboard') }}"
                    class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700
-                        text-gray-700 dark:text-gray-300
                         {{ request()->routeIs('murid.dashboard') ? 'nav-active' : '' }}">
                     <i class="fas fa-home w-5"></i> Dashboard
                 </a>
 
-                <a href="{{ route('murid.tugas') }}"
-                   class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700
-                        text-gray-700 dark:text-gray-300
-                        {{ request()->routeIs('murid.tugas') ? 'nav-active' : '' }}">
-                    <i class="fas fa-tasks w-5"></i> Tugas
-                </a>
-
                 <a href="{{ route('murid.modul') }}"
-                   class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700
-                        text-gray-700 dark:text-gray-300">
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700">
                     <i class="fas fa-book w-5"></i> Modul
                 </a>
 
-                <a href="#"
-                   class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700
-                        text-gray-700 dark:text-gray-300">
-                    <i class="fas fa-trophy w-5"></i> Leaderboard
-                </a>
+                {{-- ================================
+                     LEADERBOARD SLOT (OPTIONAL)
+                     HANYA MUNCUL JIKA VIEW MENGISI
+                ================================= --}}
+                @yield('leaderboard_button')
 
                 <a href="{{ route('profile.edit') }}"
                    class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700
-                        text-gray-700 dark:text-gray-300
                         {{ request()->routeIs('profile.edit') ? 'nav-active' : '' }}">
                     <i class="fas fa-user-cog w-5"></i> Profile
                 </a>
 
-                <!-- LOGOUT -->
                 <form method="POST" action="{{ route('logout') }}" class="mt-3">
                     @csrf
                     <button type="submit"
@@ -130,10 +105,9 @@
                     </button>
                 </form>
 
-                <!-- THEME SWITCH -->
                 <button id="toggleTheme"
                         class="w-full flex items-center gap-3 px-4 py-3 rounded-xl mt-3
-                               bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
+                               bg-gray-200 dark:bg-gray-700">
                     <i id="themeIcon" class="fas fa-moon w-5"></i>
                     <span id="themeLabel">Dark Mode</span>
                 </button>
@@ -146,7 +120,7 @@
         </aside>
 
 
-        <!-- SIDEBAR MOBILE -->
+        <!-- MOBILE SIDEBAR -->
         <div id="mobileSidebar"
              class="fixed top-0 left-0 w-64 h-full bg-white dark:bg-gray-800 shadow-xl p-6 z-50
                     transform -translate-x-full transition-all duration-300 lg:hidden">
@@ -155,61 +129,43 @@
                 <div class="flex items-center gap-3">
                     <img src="{{ asset('img/sgc-logo.png') }}" class="w-10 h-10 rounded-md shadow-sm">
                     <div>
-                        <h2 class="font-bold text-lg text-gray-900 dark:text-white">SGC</h2>
+                        <h2 class="font-bold text-lg dark:text-white">SGC</h2>
                         <p class="text-sm text-gray-500 dark:text-gray-400">Front-End Class</p>
                     </div>
                 </div>
-                <button id="closeSidebar"
-                        class="p-2 rounded-md text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700">
+                <button id="closeSidebar" class="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700">
                     <i class="fas fa-times"></i>
                 </button>
             </div>
 
             <nav class="space-y-2">
                 <a href="{{ route('murid.dashboard') }}"
-                   class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700
-                        text-gray-700 dark:text-gray-300
-                        {{ request()->routeIs('murid.dashboard') ? 'nav-active' : '' }}">
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700">
                     <i class="fas fa-home w-5"></i> Dashboard
                 </a>
 
-                <a href="{{ route('murid.tugas') }}"
-                   class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700
-                        text-gray-700 dark:text-gray-300
-                        {{ request()->routeIs('murid.tugas') ? 'nav-active' : '' }}">
-                    <i class="fas fa-tasks w-5"></i> Tugas
-                </a>
-
-                <a href="{{ route('murid.modul') }}" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700
-                        text-gray-700 dark:text-gray-300">
+                <a href="{{ route('murid.modul') }}"
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700">
                     <i class="fas fa-book w-5"></i> Modul
                 </a>
 
-                <a href="#" class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700
-                        text-gray-700 dark:text-gray-300">
-                    <i class="fas fa-trophy w-5"></i> Leaderboard
-                </a>
-
+                {{-- Tidak membuat leaderboard disini untuk menghindari error $module --}}
+                
                 <a href="{{ route('profile.edit') }}"
-                   class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700
-                        text-gray-700 dark:text-gray-300
-                        {{ request()->routeIs('profile.edit') ? 'nav-active' : '' }}">
+                   class="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-gray-100 dark:hover:bg-gray-700">
                     <i class="fas fa-user-cog w-5"></i> Profile
                 </a>
 
-                <!-- Logout -->
                 <form method="POST" action="{{ route('logout') }}" class="mt-3">
                     @csrf
-                    <button type="submit"
-                            class="w-full flex items-center gap-3 px-4 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600">
+                    <button class="w-full flex items-center gap-3 px-4 py-3 bg-red-500 text-white rounded-xl">
                         <i class="fas fa-sign-out-alt w-5"></i> Logout
                     </button>
                 </form>
 
-                <!-- Theme -->
                 <button id="toggleThemeMobile"
                         class="w-full flex items-center gap-3 px-4 py-3 rounded-xl mt-3
-                               bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200">
+                               bg-gray-200 dark:bg-gray-700">
                     <i id="themeIconMobile" class="fas fa-moon w-5"></i>
                     <span id="themeLabelMobile">Dark Mode</span>
                 </button>
@@ -222,18 +178,16 @@
              class="fixed inset-0 bg-black/50 hidden z-40 lg:hidden"></div>
 
 
-        <!-- MAIN CONTENT -->
+        <!-- MAIN -->
         <main class="flex-1 p-6 lg:p-10">
             @yield('content')
         </main>
 
     </div>
 
-    <!-- SCRIPT -->
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            
-            // sidebar elements
+
             const openBtn = document.getElementById("openSidebar");
             const closeBtn = document.getElementById("closeSidebar");
             const sidebar = document.getElementById("mobileSidebar");
@@ -242,23 +196,19 @@
             function open() {
                 sidebar.classList.remove("-translate-x-full");
                 overlay.classList.remove("hidden");
-                document.body.style.overflow = "hidden";
             }
             function close() {
                 sidebar.classList.add("-translate-x-full");
                 overlay.classList.add("hidden");
-                document.body.style.overflow = "";
             }
 
-            if (openBtn) openBtn.onclick = open;
-            if (closeBtn) closeBtn.onclick = close;
-            if (overlay) overlay.onclick = close;
+            openBtn && (openBtn.onclick = open);
+            closeBtn && (closeBtn.onclick = close);
+            overlay && (overlay.onclick = close);
 
-
-            // theme buttons
+            // Theme toggle
             const themeBtn = document.getElementById("toggleTheme");
             const themeBtnMobile = document.getElementById("toggleThemeMobile");
-
             const icon = document.getElementById("themeIcon");
             const label = document.getElementById("themeLabel");
             const iconM = document.getElementById("themeIconMobile");
@@ -266,17 +216,12 @@
 
             function applyUI() {
                 const dark = document.documentElement.classList.contains("dark");
-
                 if (dark) {
-                    icon.className = "fas fa-sun w-5";
-                    label.textContent = "Light Mode";
-                    iconM.className = "fas fa-sun w-5";
-                    labelM.textContent = "Light Mode";
+                    icon.className = iconM.className = "fas fa-sun w-5";
+                    label.textContent = labelM.textContent = "Light Mode";
                 } else {
-                    icon.className = "fas fa-moon w-5";
-                    label.textContent = "Dark Mode";
-                    iconM.className = "fas fa-moon w-5";
-                    labelM.textContent = "Dark Mode";
+                    icon.className = iconM.className = "fas fa-moon w-5";
+                    label.textContent = labelM.textContent = "Dark Mode";
                 }
             }
 
@@ -292,13 +237,13 @@
                 applyUI();
             }
 
-            if (themeBtn) themeBtn.onclick = toggleTheme;
-            if (themeBtnMobile) themeBtnMobile.onclick = toggleTheme;
+            themeBtn && (themeBtn.onclick = toggleTheme);
+            themeBtnMobile && (themeBtnMobile.onclick = toggleTheme);
 
             applyUI();
         });
     </script>
-    
+
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     @stack('scripts')
 

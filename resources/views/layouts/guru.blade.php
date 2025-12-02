@@ -211,6 +211,22 @@
 
 <body class="content-bg dark:text-gray-100 min-h-screen">
 
+    @php
+    $notifCount = \App\Models\ModuleNotification::where('to_user_id', auth()->id())
+        ->where('read', false)
+        ->count();
+    @endphp
+
+    <a href="{{ route('guru.notif') }}" class="relative text-white">
+        🔔
+        @if($notifCount > 0)
+            <span class="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded-full">
+                {{ $notifCount }}
+            </span>
+        @endif
+    </a>
+
+
     <!-- MOBILE NAVBAR -->
     <div class="lg:hidden fixed top-0 left-0 w-full px-4 py-3 mobile-nav-bg shadow-lg flex items-center justify-between z-40 animate-fade-in">
         <button id="openSidebar"
@@ -266,10 +282,10 @@
                     <i class="fas fa-users w-5"></i> Murid Binaan
                 </a>
 
-                <a href="{{ route('guru.profile') }}"
+                <a href="{{ route('guru.profile.edit') }}"
                     class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl hover-lift
                     text-gray-700 dark:text-gray-300
-                    {{ request()->routeIs('guru.profile') ? 'active-nav text-indigo-600 font-semibold' : '' }}">
+                    {{ request()->routeIs('guru.profile.edit') ? 'active-nav text-indigo-600 font-semibold' : '' }}">
                     <i class="fas fa-user-cog w-5"></i> Profil
                 </a>
 
@@ -335,9 +351,9 @@
                     <i class="fas fa-users w-5"></i> Murid Binaan
                 </a>
 
-                <a href="{{ route('guru.profile') }}"
+                <a href="{{ route('guru.profile.edit') }}"
                     class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl hover-lift
-                    {{ request()->routeIs('guru.profile') ? 'active-nav text-indigo-600 font-semibold' : '' }}">
+                    {{ request()->routeIs('guru.profile.edit') ? 'active-nav text-indigo-600 font-semibold' : '' }}">
                     <i class="fas fa-user-cog w-5"></i> Profil
                 </a>
 

@@ -33,7 +33,7 @@
                     {{ $m->description }}
                 </p>
 
-                <div class="flex gap-2 mt-5">
+                <div class="flex flex-wrap gap-2 mt-5">
 
                     <!-- Kelola Chapter -->
                     <a href="{{ route('guru.modul.chapter.index', $m->id) }}"
@@ -41,11 +41,16 @@
                         Kelola Chapter
                     </a>
 
-
                     <!-- Edit Modul -->
                     <a href="{{ route('guru.modul.edit', $m->id) }}"
                        class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm">
                         Edit Modul
+                    </a>
+
+                    <!-- Lihat Komentar -->
+                    <a href="{{ route('guru.modul.comments', $m->id) }}"
+                       class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg text-sm">
+                        Lihat Komentar
                     </a>
 
                     <!-- Delete -->
@@ -59,6 +64,7 @@
                             Hapus
                         </button>
                     </form>
+
                 </div>
 
             </div>
