@@ -9,19 +9,21 @@ use App\Models\Chapter;
 use App\Models\ChapterCompletion;
 use App\Models\Answer;
 use App\Models\Question;
+use App\Models\User;
 
 class MuridDashboardController extends Controller
 {
     /**
-     * Dashboard utama murid
+     * DASHBOARD UTAMA
      */
     public function index()
     {
+        /** @var \App\Models\User $user */
         $user = Auth::user();
 
-        // =====================================================================
-        // 1. HITUNG MODUL SELESAI (REAL)
-        // =====================================================================
+        // ================================================================
+        // 1. HITUNG PROGRESS MODUL
+        // ================================================================
         $modules = Module::with('chapters')->get();
 
         $modul_selesai = 0;
@@ -52,40 +54,50 @@ class MuridDashboardController extends Controller
             ];
         }
 
-        // =====================================================================
-        // 2. HITUNG XP & LEVEL
-        // =====================================================================
+        // ================================================================
+        // 2. XP & LEVEL SYSTEM
+        // ================================================================
         $xp_per_modul = 100;
         $xp_total = $modul_selesai * $xp_per_modul;
 
-        // Naik level setiap 500 XP
         $level = 1 + floor($xp_total / 500);
-
-        // Progress menuju level berikutnya
         $xp_for_next = $level * 500;
         $xp_progress = min(100, round(($xp_total / $xp_for_next) * 100));
 
-        // Ranking (placeholder)
-        $rank = '-';
+        // Simpan
+        $user->xp_total = $xp_total;
+        $user->level = $level;
+        $user->save();
 
-        // =====================================================================
-        // 3. TUGAS PENDING
-        // =====================================================================
+        // ================================================================
+        // 3. GLOBAL RANKING BERDASARKAN XP
+        // ================================================================
+        $ranking = User::where('role', 'murid')
+            ->orderBy('xp_total', 'desc')
+            ->pluck('id')
+            ->toArray();
+
+        $rankPosition = array_search($user->id, $ranking);
+        $rankPosition = $rankPosition !== false ? $rankPosition + 1 : '-';
+
+        // ================================================================
+        // 4. TUGAS PENDING
+        // ================================================================
         $tugas_pending = Question::leftJoin('answers', function ($join) use ($user) {
                 $join->on('questions.id', '=', 'answers.question_id')
-                     ->where('answers.user_id', $user->id);
+                    ->where('answers.user_id', $user->id);
             })
             ->whereNull('answers.id')
             ->count();
 
-        // =====================================================================
-        // 4. TUGAS TERBARU
-        // =====================================================================
+        // ================================================================
+        // 5. TUGAS TERBARU
+        // ================================================================
         $latest_tasks = Question::leftJoin('chapters', 'questions.chapter_id', '=', 'chapters.id')
             ->leftJoin('modules', 'chapters.module_id', '=', 'modules.id')
             ->leftJoin('answers', function ($join) use ($user) {
                 $join->on('questions.id', '=', 'answers.question_id')
-                     ->where('answers.user_id', $user->id);
+                    ->where('answers.user_id', $user->id);
             })
             ->select(
                 'questions.*',
@@ -98,43 +110,61 @@ class MuridDashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // =====================================================================
-        // 5. BADGES (placeholder)
-        // =====================================================================
+        // ================================================================
+        // 6. BADGES (opsional)
+        // ================================================================
         $badges = [];
 
-        // =====================================================================
-        // 6. KIRIM DATA KE VIEW
-        // =====================================================================
+        // ================================================================
+        // 7. RETURN VIEW
+        // ================================================================
         return view('dashboard.murid', [
             'user' => $user,
 
-            // Modul & progress
-            'modul_selesai' => $modul_selesai,
-            'modules_progress' => $modules_progress,
+            'modul_selesai'      => $modul_selesai,
+            'modules_progress'   => $modules_progress,
 
-            // XP dan level
-            'xp_total' => $xp_total,
-            'level' => $level,
-            'xp_for_next' => $xp_for_next,
-            'xp_progress' => $xp_progress,
-            'rank' => $rank,
+            'xp_total'     => $xp_total,
+            'level'        => $level,
+            'xp_for_next'  => $xp_for_next,
+            'xp_progress'  => $xp_progress,
 
-            // Tugas
+            'rank'         => $rankPosition,
+
             'tugas_pending' => $tugas_pending,
-            'latest_tasks' => $latest_tasks,
-
-            // Badges
-            'badges' => $badges,
+            'latest_tasks'  => $latest_tasks,
+            'badges'        => $badges,
         ]);
     }
 
     /**
-     * Halaman list modul untuk murid
+     * PAGE LIST MODUL
      */
     public function modul()
     {
         $modules = Module::all();
         return view('dashboard.modul', compact('modules'));
     }
+
+    /**
+     * LEADERBOARD GLOBAL BERDASARKAN XP
+     */
+    public function leaderboard()
+    {
+        $user = Auth::user();
+
+        $leaderboard = User::where('role', 'murid')
+            ->orderBy('xp_total', 'desc')
+            ->get();
+
+        $rank = $leaderboard->search(fn($u) => $u->id === $user->id);
+        $rank = $rank !== false ? $rank + 1 : '-';
+
+        return view('murid.leaderboard', [
+            'leaderboard' => $leaderboard,
+            'userRank' => $rank,
+            'user' => $user
+        ]);
+    }
+
 }

@@ -5,6 +5,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
     <title><?php echo $__env->yieldContent('title', 'SGC Guru Dashboard'); ?></title>
+    <link rel="shortcut icon" href="<?php echo e(asset('img/sgc-logo.png')); ?>" type="image/x-icon">
 
     <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -211,22 +212,6 @@
 
 <body class="content-bg dark:text-gray-100 min-h-screen">
 
-    <?php
-    $notifCount = \App\Models\ModuleNotification::where('to_user_id', auth()->id())
-        ->where('read', false)
-        ->count();
-    ?>
-
-    <a href="<?php echo e(route('guru.notif')); ?>" class="relative text-white">
-        🔔
-        <?php if($notifCount > 0): ?>
-            <span class="absolute -top-2 -right-2 bg-red-600 text-white text-xs px-1.5 py-0.5 rounded-full">
-                <?php echo e($notifCount); ?>
-
-            </span>
-        <?php endif; ?>
-    </a>
-
 
     <!-- MOBILE NAVBAR -->
     <div class="lg:hidden fixed top-0 left-0 w-full px-4 py-3 mobile-nav-bg shadow-lg flex items-center justify-between z-40 animate-fade-in">
@@ -254,7 +239,6 @@
             <div class="flex items-center gap-3 mb-8 animate-fade-in">
                 <div class="relative">
                     <img src="<?php echo e(asset('img/sgc-logo.png')); ?>" class="w-12 h-12 rounded-lg shadow-lg logo-glow">
-                    <div class="absolute -bottom-1 -right-1 w-4 h-4 bg-green-500 rounded-full pulse-dot"></div>
                 </div>
                 <div>
                     <h2 class="font-bold text-xl text-transparent bg-clip-text gradient-bg">SGC</h2>
@@ -278,7 +262,7 @@
                     <i class="fas fa-book w-5"></i> Kelola Modul
                 </a>
 
-                <a href="#"
+                <a href="<?php echo e(route('guru.murid.index')); ?>"
                     class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl hover-lift
                     text-gray-700 dark:text-gray-300">
                     <i class="fas fa-users w-5"></i> Murid Binaan
@@ -321,7 +305,6 @@
                 <div class="flex items-center gap-3">
                     <div class="relative">
                         <img src="<?php echo e(asset('img/sgc-logo.png')); ?>" class="w-10 h-10 rounded-lg shadow-lg logo-glow">
-                        <div class="absolute -bottom-1 -right-1 w-3 h-3 bg-green-500 rounded-full pulse-dot"></div>
                     </div>
                     <div>
                         <h2 class="font-bold text-lg text-transparent bg-clip-text gradient-bg">SGC</h2>
@@ -349,9 +332,11 @@
                     <i class="fas fa-book w-5"></i> Kelola Modul
                 </a>
 
-                <a href="#" class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl hover-lift">
+                <a href="<?php echo e(route('guru.murid.index')); ?>" 
+                class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl hover-lift">
                     <i class="fas fa-users w-5"></i> Murid Binaan
                 </a>
+
 
                 <a href="<?php echo e(route('guru.profile.edit')); ?>"
                     class="nav-item flex items-center gap-3 px-4 py-3 rounded-xl hover-lift
@@ -365,6 +350,15 @@
                     <i id="themeIconMobile" class="rotate-fade fas fa-moon w-5"></i>
                     <span id="themeLabelMobile">Dark Mode</span>
                 </button>
+
+                <!-- LOGOUT (MOBILE) -->
+                <form action="<?php echo e(route('logout')); ?>" method="POST" class="mt-4">
+                    <?php echo csrf_field(); ?>
+                    <button class="logout-btn w-full flex items-center gap-3 px-4 py-3 text-white rounded-xl">
+                        <i class="fas fa-sign-out-alt w-5"></i> Logout
+                    </button>
+                </form>
+
 
             </nav>
         </aside>

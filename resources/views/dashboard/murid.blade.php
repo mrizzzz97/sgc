@@ -9,134 +9,318 @@
     $xp_total = $xp_total ?? 0;
     $level = $level ?? 1;
     $xp_progress = $xp_progress ?? 0;
+    $xp_for_next = $xp_for_next ?? ($level * 500);
 @endphp
 
 <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+/* ====== WRAPPER ====== */
+.dashboard-container {
+    max-width: 1150px;
+    margin: 0 auto;
+    padding: 0 1.5rem;
+}
 
-<div class="max-w-7xl mx-auto">
+/* ====== BASE CARD ====== */
+.card {
+    @apply bg-white dark:bg-gray-800;
+    padding: 24px;
+    border-radius: 22px;
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: .25s ease;
+}
 
-    <!-- Header -->
-    <div class="mb-8">
-        <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow">
-            <div class="flex items-center justify-between">
-                <div>
-                    <h1 class="text-2xl font-bold dark:text-white">Progress Belajar Kamu 🎓</h1>
-                    <p class="text-sm text-gray-600 dark:text-gray-300 mt-1">Lihat perkembangan belajar kamu.</p>
-                </div>
 
-                <div class="text-right">
-                    <p class="text-sm text-gray-500">Member</p>
-                    <p class="font-semibold dark:text-white">{{ $user->name }}</p>
-                    <p class="text-xs text-gray-400">Joined {{ $user->created_at->format('M Y') }}</p>
-                </div>
-            </div>
-        </div>
-    </div>
+.card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 12px 22px rgba(0,0,0,0.08);
+}
 
-    <!-- Top Stats -->
-    <div class="grid lg:grid-cols-3 gap-6 mb-6">
-        <div class="p-6 bg-white dark:bg-gray-800 rounded-xl shadow">
-            <p class="text-sm text-gray-500">Modul Selesai</p>
-            <p class="text-3xl font-extrabold text-indigo-600 mt-3">{{ $modul_selesai }}</p>
-        </div>
+/* ====== HEADER ====== */
+.header-card {
+    padding: 32px;
+    border-radius: 22px;
+    margin-bottom: 20px;
+    box-shadow: 0 18px 30px rgba(0,0,0,0.12);
+}
 
-        <!-- Tugas Pending DIHAPUS -->
+/* ====== STAT CARD ====== */
+.stat-card {
+    padding: 26px;
+    text-align: center;
+    border-radius: 22px;
+    background: linear-gradient(135deg,#ffffff,#f8fafc);
+    border: 1px solid rgba(0,0,0,0.05);
+    transition: .25s;
+}
 
-        <div class="p-6 bg-white dark:bg-gray-800 rounded-xl shadow">
-            <p class="text-sm text-gray-500">Rank Kelas</p>
-            <p class="text-3xl font-extrabold text-green-400 mt-3">Top {{ $rank }}</p>
-        </div>
-    </div>
+.dark .stat-card {
+    background: linear-gradient(135deg,#1f2937,#111827);
+    border-color: rgba(255,255,255,0.05);
+}
 
-    <!-- XP -->
-    <div data-aos="fade-up" class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow mb-6">
-        <div class="flex items-center justify-between">
+.stat-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.12);
+}
+
+/* ICON */
+.icon-box {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    margin:auto;
+    margin-bottom:12px;
+}
+
+.icon-green {background:linear-gradient(135deg,#10b981,#059669);}
+.icon-blue {background:linear-gradient(135deg,#3b82f6,#2563eb);}
+.icon-orange {background:linear-gradient(135deg,#f59e0b,#d97706);}
+
+/* ====== TITLES ====== */
+.section-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    color: var(--tw-gray-900);
+}
+
+.section-title::after {
+    content:'';
+    width:40px;height:3px;
+    background:linear-gradient(90deg,#6366f1,#8b5cf6);
+    border-radius:3px;
+    display:block;
+    margin-top:4px;
+}
+
+/* ====== PROGRESS BAR ====== */
+.progress-wrap {
+    width:100%;
+    height:10px;
+    border-radius:999px;
+    background:#e5e7eb;
+    overflow:hidden;
+}
+
+.dark .progress-wrap {background:#374151;}
+
+.progress-val {
+    height:100%;
+    border-radius:999px;
+    background:linear-gradient(90deg,#6366f1,#8b5cf6);
+    transition: width 1s ease-out;
+}
+
+/* ====== MODULE ITEM ====== */
+.mod-item {
+    padding:18px;
+    border-radius:18px;
+    background:#f3f4f6;
+    border:1px solid rgba(0,0,0,0.03);
+    transition: .25s ease;
+}
+
+.dark .mod-item {
+    background:#1f2937;
+    border-color:rgba(255,255,255,0.04);
+}
+
+.mod-item:hover {
+    background:white;
+    box-shadow:0 4px 12px rgba(0,0,0,0.06);
+}
+
+.dark .mod-item:hover {
+    background:#374151;
+}
+
+/* ====== PROFILE CARD ====== */
+.profile-card {
+    padding:28px;
+    border-radius:22px;
+}
+
+.user-avatar {
+    width:84px;
+    height:84px;
+    border-radius:50%;
+    background:linear-gradient(135deg,#6366f1,#8b5cf6);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-size:1.5rem;
+    font-weight:700;
+    margin:auto;
+    transition: .25s;
+}
+
+.user-avatar:hover {
+    transform:scale(1.07);
+    box-shadow:0 12px 20px rgba(99,102,241,0.25);
+}
+</style>
+
+<div class="dashboard-container space-y-6">
+
+    <!-- HEADER -->
+    <div data-aos="fade-down"
+        class="card header-card bg-gradient-to-r from-indigo-500 to-purple-600 text-white border-0">
+
+        <div class="flex flex-col md:flex-row justify-between items-center gap-4">
             <div>
-                <h3 class="text-lg font-bold dark:text-white">Level & XP</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-300">Level {{ $level }} — {{ $xp_total }} XP</p>
+                <h1 class="text-2xl font-bold">Dashboard Belajar</h1>
+                <p class="text-sm text-white/80">Progress kamu hari ini.</p>
             </div>
-            <div class="text-right">
-                <p class="text-sm text-gray-500">Next: {{ $xp_for_next ?? ($level * 100) }} XP</p>
-            </div>
-        </div>
 
-        <div class="mt-4">
-            <div class="w-full bg-gray-200 dark:bg-gray-700 h-3 rounded-full overflow-hidden">
-                <div class="h-3 bg-indigo-500" style="width: {{ $xp_progress }}%"></div>
+            <div class="rounded-xl bg-white/10 backdrop-blur-md px-4 py-2 text-center">
+                <p class="text-xs text-white/70">Member</p>
+                <p class="text-lg font-semibold">{{ $user->name }}</p>
+                <p class="text-xs text-white/60">{{ $user->created_at->format('M Y') }}</p>
             </div>
-            <p class="text-xs text-gray-500 mt-2">
-                {{ $xp_total }} / {{ $xp_for_next ?? ($level * 100) }} XP ({{ $xp_progress }}%)
-            </p>
         </div>
     </div>
 
-    <!-- Modul yang sedang dikerjakan -->
-    <div class="grid lg:grid-cols-3 gap-6">
-        <div class="lg:col-span-2 space-y-6">
+    <!-- TOP STATS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        
+        <div data-aos="fade-up" class="stat-card">
+            <div class="icon-box icon-green">
+                <i class="fa-solid fa-check text-white text-xl"></i>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Selesai</p>
+            <p class="text-2xl font-bold">{{ $modul_selesai }}</p>
+        </div>
 
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-bold dark:text-white">Modul yang sedang kamu kerjakan</h3>
-                    <a href="{{route('murid.modul')}}" class="text-sm text-indigo-600">Lihat semua</a>
+        <div data-aos="fade-up" data-aos-delay="150" class="stat-card">
+            <div class="icon-box icon-blue">
+                <i class="fas fa-ranking-star text-white text-xl"></i>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">Rank</p>
+            <p class="text-2xl font-bold text-blue-500">Top {{ $rank }}</p>
+        </div>
+
+        <div data-aos="fade-up" data-aos-delay="300" class="stat-card">
+            <div class="icon-box icon-orange">
+                <i class="fas fa-fire text-white text-xl"></i>
+            </div>
+            <p class="text-xs text-gray-500 dark:text-gray-400">XP</p>
+            <p class="text-2xl font-bold">{{ $xp_total }}</p>
+        </div>
+
+    </div>
+
+    <!-- LEVEL & XP -->
+    <div class="card" data-aos="fade-up" data-aos-delay="400">
+        <h3 class="section-title">Level & XP</h3>
+
+        <p class="text-sm text-gray-600 dark:text-gray-400">Lv {{ $level }} • {{ $xp_total }} XP</p>
+
+        <div class="progress-wrap my-3">
+            <div class="progress-val" style="width: {{ $xp_progress }}%"></div>
+        </div>
+
+        <div class="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+            <span>{{ $xp_total }} XP</span>
+            <span>{{ $xp_progress }}%</span>
+            <span>{{ $xp_for_next }} XP</span>
+        </div>
+    </div>
+
+    <!-- MAIN TWO COLUMNS -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- MODULE LIST -->
+        <div class="lg:col-span-2 space-y-4">
+            <div class="card module-card" data-aos="fade-right" data-aos-delay="500">
+                <div class="flex justify-between mb-4">
+                    <h3 class="section-title">Modul Kamu</h3>
+                    <a href="{{ route('murid.modul') }}"
+                       class="text-sm text-indigo-500 hover:underline">Lihat semua →</a>
                 </div>
 
                 <div class="space-y-3">
                     @forelse ($modules_progress as $m)
-                        <div class="p-3 rounded-lg bg-gray-50 dark:bg-gray-700">
-                            <div class="flex items-center justify-between">
-                                <div>
-                                    <p class="font-semibold dark:text-white">{{ $m['title'] }}</p>
-                                    <p class="text-xs text-gray-500 dark:text-gray-300">
-                                        {{ $m['completed'] }} / {{ $m['total_chapters'] }} chapter
-                                    </p>
-                                </div>
-                                <div class="text-sm text-gray-500">{{ $m['percent'] }}%</div>
+                        <div class="mod-item">
+                            <div class="flex justify-between">
+                                <p class="font-semibold">{{ $m['title'] }}</p>
+                                <p class="font-semibold text-indigo-500">{{ $m['percent'] }}%</p>
                             </div>
-
-                            <div class="w-full mt-3 h-2 bg-gray-200 dark:bg-gray-600 rounded-full overflow-hidden">
-                                <div class="h-full bg-indigo-500" style="width: {{ $m['percent'] }}%"></div>
+                            <p class="text-xs text-gray-500 dark:text-gray-400 mb-2">
+                                {{ $m['completed'] }} / {{ $m['total_chapters'] }}
+                            </p>
+                            <div class="progress-wrap h-2">
+                                <div class="progress-val" style="width: {{ $m['percent'] }}%"></div>
                             </div>
                         </div>
                     @empty
-                        <p class="text-sm text-gray-500">Belum ada modul yang aktif.</p>
+                        <div class="text-center py-6">
+                            <i class="fas fa-book text-3xl text-gray-300 dark:text-gray-600"></i>
+                            <p class="text-sm mt-2 text-gray-500 dark:text-gray-400">
+                                Belum ada modul aktif.
+                            </p>
+                        </div>
                     @endforelse
+                </div>
+            </div>
+        </div>
+
+        <!-- PROFILE CARD -->
+        <div class="card profile-card text-center" data-aos="fade-left" data-aos-delay="550">
+
+            <div class="user-avatar">
+                {{ strtoupper(substr($user->name, 0, 1)) }}
+            </div>
+
+            <h4 class="mt-4 font-semibold text-lg">{{ $user->name }}</h4>
+            <p class="text-xs text-gray-500 dark:text-gray-400">
+                Murid • {{ $user->created_at->format('M Y') }}
+            </p>
+
+            <div class="mt-4 bg-gray-50 dark:bg-gray-700 p-4 rounded-xl">
+                <p class="text-xs text-gray-500 dark:text-gray-300 mb-2">Progress</p>
+
+                <div class="progress-wrap h-2 mb-2">
+                    <div class="progress-val" style="width: {{ $xp_progress }}%"></div>
+                </div>
+
+                <div class="flex justify-between text-xs text-gray-600 dark:text-gray-300">
+                    <span>Lv {{ $level }}</span>
+                    <span>{{ $xp_total }} XP</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3 mt-4">
+                <div class="bg-gray-50 dark:bg-gray-700 py-3 rounded-lg">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Done</p>
+                    <p class="font-semibold">{{ $modul_selesai }}</p>
+                </div>
+
+                <div class="bg-gray-50 dark:bg-gray-700 py-3 rounded-lg">
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Rank</p>
+                    <p class="font-semibold text-blue-500">{{ $rank }}</p>
                 </div>
             </div>
 
         </div>
-
-        <!-- Profile -->
-        <aside class="space-y-6">
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow text-center">
-                <div class="w-20 h-20 mx-auto rounded-full bg-indigo-600 text-white text-2xl font-bold flex items-center justify-center">
-                    {{ strtoupper(substr($user->name, 0, 1)) }}
-                </div>
-
-                <h4 class="mt-4 font-semibold dark:text-white">{{ $user->name }}</h4>
-                <p class="text-xs text-gray-400">Murid • Joined {{ $user->created_at->format('M Y') }}</p>
-
-                <div class="mt-4 text-left">
-                    <p class="text-xs text-gray-400">Progress level</p>
-                    <div class="w-full h-3 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden mt-2">
-                        <div class="h-full bg-gradient-to-r from-indigo-500 to-pink-500" style="width: {{ $xp_progress }}%"></div>
-                    </div>
-                    <p class="mt-2 text-xs text-gray-500">Level {{ $level }} • {{ $xp_total }} XP</p>
-                </div>
-            </div>
-
-        </aside>
     </div>
+
 </div>
 
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 <script>
-    (function() {
-        const percent = {{ isset($modules_progress) && count($modules_progress)
-            ? json_encode((int) round(array_sum(array_column($modules_progress, 'percent')) / max(1, count($modules_progress))))
-            : 0 }};
-        if (window.setSidebarProgress) window.setSidebarProgress(percent);
-    })();
+AOS.init({ duration:700, once:true });
+
+document.querySelectorAll(".progress-val").forEach((bar, i) => {
+    let w = bar.style.width;
+    bar.style.width = "0%";
+    setTimeout(() => bar.style.width = w, 300 + i * 100);
+});
 </script>
 
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
-<script>AOS.init()</script>
 @endsection

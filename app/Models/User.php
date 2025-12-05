@@ -55,4 +55,10 @@ class User extends Authenticatable
 
         return 'https://ui-avatars.com/api/?name=' . urlencode($initials) . '&background=0D8ABC&color=fff';
     }
+
+    public function chapterResults()
+    {
+        return $this->hasMany(\App\Models\ChapterResult::class, 'user_id');
+    }
+
 }

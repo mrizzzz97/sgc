@@ -3,71 +3,115 @@
 @section('title', 'Komentar Modul')
 
 @section('content')
+<div class="min-h-screen bg-gradient-to-br 
+            from-gray-50 to-gray-200 
+            dark:from-gray-900 dark:to-gray-800 
+            transition-all duration-300">
 
-<div class="max-w-5xl mx-auto p-10">
+    <div class="max-w-4xl mx-auto p-6 md:p-10">
 
-    <h1 class="text-3xl font-bold text-white mb-6">
-        Komentar Modul: {{ $module->title }}
-    </h1>
-
-    {{-- FORM TAMBAH KOMENTAR (GURU) --}}
-    <div class="bg-gray-800 p-6 rounded-xl mb-10 shadow">
-        <h3 class="text-xl font-semibold text-white mb-4">Tambahkan Komentar</h3>
-
-        <form action="{{ route('modules.comment', $module->id) }}" method="POST">
-            @csrf
-
-            <textarea name="comment"
-                class="w-full p-3 rounded-lg bg-gray-700 text-white border border-gray-600 focus:border-indigo-500 focus:outline-none"
-                rows="3"
-                placeholder="Tulis komentar sebagai Guru..."></textarea>
-
-            <button class="mt-3 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg">
-                Kirim Komentar
-            </button>
-        </form>
-    </div>
-
-    {{-- LIST KOMENTAR --}}
-    <div class="bg-gray-900 p-6 rounded-xl shadow-lg">
-
-        <h2 class="text-xl font-semibold text-white mb-6">Semua Komentar</h2>
-
-        <div class="space-y-6">
-            @foreach ($module->comments->where('parent_id', null) as $comment)
-                @include('components.comment-bubble', [
-                    'comment' => $comment,
-                    'module'  => $module
-                ])
-            @endforeach
+        <!-- HEADER -->
+        <div class="bg-white dark:bg-gray-800 shadow-xl rounded-2xl overflow-hidden mb-10
+                    transition-all duration-300 hover:shadow-2xl">
+            <div class="bg-gradient-to-r from-indigo-500 to-purple-600 p-6">
+                <h1 class="text-3xl font-bold text-white drop-shadow">
+                    Komentar Modul
+                </h1>
+                <p class="text-indigo-100 mt-1 text-sm">
+                    {{ $module->title }}
+                </p>
+            </div>
         </div>
 
-        @if ($module->comments->where('parent_id', null)->count() === 0)
-            <div class="text-center py-10 text-gray-400">
-                Belum ada komentar untuk modul ini.
+        <!-- FORM KOMENTAR -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl mb-12
+                    transform transition-all duration-300 hover:shadow-2xl">
+
+            <h3 class="text-xl font-semibold dark:text-white mb-4">
+                Tambahkan Komentar
+            </h3>
+
+            <form action="{{ route('modules.comment', $module->id) }}" method="POST" class="space-y-4">
+                @csrf
+
+                <textarea name="comment" rows="3"
+                    class="w-full p-4 rounded-xl bg-gray-100 dark:bg-gray-700 
+                           text-gray-800 dark:text-white border border-gray-300 
+                           dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 
+                           focus:border-transparent transition-all duration-200"
+                    placeholder="Tulis komentar sebagai Guru..."></textarea>
+
+                <button
+                    class="px-5 py-3 bg-gradient-to-r from-indigo-500 to-purple-600 
+                           text-white rounded-xl font-medium shadow-lg 
+                           hover:shadow-xl transform hover:scale-105 transition-all duration-200
+                           flex items-center gap-2">
+                    <i class="fas fa-paper-plane text-sm"></i>
+                    Kirim Komentar
+                </button>
+            </form>
+        </div>
+
+        <!-- LIST KOMENTAR -->
+        <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-xl
+                    transform transition-all duration-300 hover:shadow-2xl">
+
+            <h2 class="text-xl font-semibold dark:text-white mb-6">
+                Semua Komentar
+            </h2>
+
+            <div class="space-y-6" id="commentList">
+                @foreach ($module->comments->where('parent_id', null) as $comment)
+                    @include('components.comment-bubble', [
+                        'comment' => $comment,
+                        'module'  => $module
+                    ])
+                @endforeach
             </div>
-        @endif
 
+            @if ($module->comments->where('parent_id', null)->count() === 0)
+                <div class="text-center py-10 text-gray-500 dark:text-gray-400">
+                    Belum ada komentar untuk modul ini.
+                </div>
+            @endif
+        </div>
     </div>
-
 </div>
 
-{{-- JS reply & toggle --}}
+
+{{-- SCRIPT --}}
 <script>
+    // ANIMASI MASUK
+    document.addEventListener("DOMContentLoaded", () => {
+        const bubbles = document.querySelectorAll("#commentList > *");
+        bubbles.forEach((el, i) => {
+            el.style.opacity = "0";
+            el.style.transform = "translateY(15px)";
+            setTimeout(() => {
+                el.style.transition = "0.4s";
+                el.style.opacity = "1";
+                el.style.transform = "translateY(0)";
+            }, 100 * i);
+        });
+    });
+
+    // REPLY FORM TOGGLE
     function openReplyForm(id) {
         document.getElementById('reply-form-' + id).classList.toggle('hidden');
     }
+
+    // TOGGLE REPLIES
     function toggleReplies(id) {
         const wrapper = document.getElementById('reply-wrapper-' + id);
         const text = document.getElementById('toggle-reply-text-' + id);
-        const count = text.textContent.match(/\((\d+)\)/)[1];
+        const count = text.dataset.count;
 
         if (wrapper.classList.contains('hidden')) {
             wrapper.classList.remove('hidden');
-            text.textContent = `Sembunyikan balasan (${count})`;
+            text.innerHTML = `Sembunyikan balasan (${count})`;
         } else {
             wrapper.classList.add('hidden');
-            text.textContent = `Tampilkan balasan (${count})`;
+            text.innerHTML = `Tampilkan balasan (${count})`;
         }
     }
 </script>

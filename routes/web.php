@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\AdminStatistikController;
 use App\Http\Controllers\ModuleController;
 use App\Http\Controllers\ChapterController;
 use App\Http\Controllers\ChapterPageController;
+use App\Http\Controllers\GuruMuridController;
 
 /*
 |--------------------------------------------------------------------------
@@ -46,29 +47,51 @@ Route::middleware(['auth', 'role:murid'])
     ->name('murid.')
     ->group(function () {
 
-        Route::get('/', [MuridDashboardController::class, 'index'])->name('dashboard');
+        // DASHBOARD MURID
+        Route::get('/', [MuridDashboardController::class, 'index'])
+            ->name('dashboard');
 
-        // MODUL LIST
-        Route::get('/modul', [MuridDashboardController::class, 'modul'])->name('modul');
+        // LIST SEMUA MODUL
+        Route::get('/modul', [MuridDashboardController::class, 'modul'])
+            ->name('modul');
 
         // MODUL DETAIL
-        Route::get('/modul/{id}', [ModuleController::class, 'show'])->name('modules.show');
+        Route::get('/modul/{id}', [ModuleController::class, 'show'])
+            ->name('modules.show');
 
-        // LEADERBOARD (FIXED)
+        // LEADERBOARD PER MODUL
         Route::get('/modul/{id}/leaderboard', [ModuleController::class, 'leaderboard'])
             ->name('modules.leaderboard');
 
-        // CHAPTER
-        Route::get('/modul/chapter/{id}', [ModuleController::class, 'chapter'])->name('modules.chapter');
+        // CHAPTER LIST
+        Route::get('/modul/chapter/{id}', [ModuleController::class, 'chapter'])
+            ->name('modules.chapter');
 
-        // PAGE
-        Route::get('/chapter/{chapter}/{page}', [ModuleController::class, 'page'])->name('modules.page');
-        Route::post('/chapter/{chapter}/{page}/complete', [ModuleController::class, 'complete'])->name('modules.page.complete');
+        // PAGE DETAIL
+        Route::get('/chapter/{chapter}/{page}', [ModuleController::class, 'page'])
+            ->name('modules.page');
 
-        // RESULT & CERTIFICATE
-        Route::get('/modul/{id}/hasil', [ModuleController::class, 'result'])->name('modules.result');
-        Route::get('/modul/{id}/sertifikat', [ModuleController::class, 'certificate'])->name('modules.certificate');
+        // MARK PAGE AS COMPLETE
+        Route::post('/chapter/{chapter}/{page}/complete', [ModuleController::class, 'complete'])
+            ->name('modules.page.complete');
+
+        // HASIL MODUL
+        Route::get('/modul/{id}/hasil', [ModuleController::class, 'result'])
+            ->name('modules.result');
+
+        // SERTIFIKAT
+        Route::get('/modul/{id}/sertifikat', [ModuleController::class, 'certificate'])
+            ->name('modules.certificate');
+
+        // 🔥 LEADERBOARD GLOBAL XP (PUNYA DASHBOARD)
+        Route::get('/leaderboard', [MuridDashboardController::class, 'leaderboard'])
+            ->name('leaderboard');
+
+        Route::post('/page/autosave', [ModuleController::class, 'autosave'])
+            ->name('modules.page.autosave');
+
     });
+
 
 
 /*
@@ -125,6 +148,10 @@ Route::middleware(['auth', 'role:guru'])
         Route::get('/notifikasi', [ModuleController::class, 'guruNotif'])->name('notif');
         Route::patch('/notifikasi/{id}/read', [ModuleController::class, 'markNotifRead'])->name('notif.read');
         Route::delete('/notifikasi/clear', [ModuleController::class, 'clearNotif'])->name('notif.clear');
+
+        Route::get('/murid', [GuruMuridController::class, 'index'])
+            ->name('murid.index');
+
     });
 
 /*
